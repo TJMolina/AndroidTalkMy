@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">TalkMy</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- TaskListFragment -->
+    <string name="btnNewTask_ES">+ Agregar nueva nota</string>
+
+
+    <!-- EditTaskFragment -->
+    <string name="editTaskHint_ES">Escribir aquí...</string>
+
+</resources>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_graph"
+    app:startDestination="@id/tasksListFragment">
+
+    <fragment
+        android:id="@+id/tasksListFragment"
+        android:name="com.tjm.talkmy.ui.tasks.TasksListFragment"
+        android:label="fragment_tasks_list"
+        tools:layout="@layout/fragment_tasks_list" >
+        <action
+            android:id="@+id/action_tasksListFragment_to_editTaskFragment"
+            app:destination="@id/editTaskFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/editTaskFragment"
+        android:name="com.tjm.talkmy.ui.taskEdit.EditTaskFragment"
+        android:label="fragment_edit_task"
+        tools:layout="@layout/fragment_edit_task" >
+        <argument
+            android:name="taskToEdit"
+            app:argType="string[]"
+            app:nullable="true" />
+    </fragment>
+</navigation>
