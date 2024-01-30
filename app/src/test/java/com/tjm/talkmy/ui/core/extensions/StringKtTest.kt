@@ -6,26 +6,15 @@ import org.junit.Test
 
 class StringKtTest{
 
-    /*
-    @RelaxedMock
-    @Mock
-    private lateinit var miRepositorio: Repositorio
-    @Before
-    fun onBefore(){
-        MockkAnnotations.init(this)
-    }
-     */
-
     @Test
     fun `separateSentences should return a list of Strings`() {
         //given
-        val texto = "Primero. Segundo. \nTercero."
+        val texto = "Primero. Segundo. \nTercero.\ncuarto\nquinto\nsexto. septimo. octavo."
 
         //when
         val result = texto.separateSentences()
 
         //then
-        println("Oracion: ${result[0]}")
         println(result.toString())
 
         assertNotNull(result)

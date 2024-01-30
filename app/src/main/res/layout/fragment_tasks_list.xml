@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".ui.tasks.TasksListFragment">
 
     <androidx.appcompat.widget.LinearLayoutCompat
@@ -11,7 +11,7 @@
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
         android:padding="8sp"
-        android:background="@color/primary"
+        style="@style/header"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -39,9 +39,11 @@
         android:id="@+id/rvTasksList"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolBar" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolBar"
+        android:paddingBottom="120dp"
+        />
 
     <Button
         android:id="@+id/btnAddNota"
@@ -49,11 +51,16 @@
         android:layout_height="50dp"
         android:layout_marginHorizontal="5dp"
         android:layout_marginVertical="10dp"
-        android:backgroundTint="@color/primary"
+        app:cornerRadius="11dp"
+        style="@style/circleButton"
         android:text="@string/btnNewTask_ES"
-        android:textStyle="bold"
+        android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rvTasksList" />
-
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginBottom="5dp"
+        app:layout_constraintVertical_bias="1"
+        android:layout_marginTop="5dp"
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>

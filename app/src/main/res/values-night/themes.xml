@@ -1,7 +1,19 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.TalkMy" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:statusBarColor">@color/primary</item>
+        <item name="android:windowBackground">#575757</item>
+    </style>
+    <style name="Theme.TalkMy" parent="Base.Theme.TalkMy" />
+    <style name="largeButton">
+        <item name="android:backgroundTint">@color/primary</item>
+    </style>
+    <style name="circleButton">
+        <item name="android:backgroundTint">@color/primary</item>
+    </style>
+    <style name="header">
+        <item name="android:background">@color/primary</item>
     </style>
 </resources>

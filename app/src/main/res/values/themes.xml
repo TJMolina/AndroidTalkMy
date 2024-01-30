@@ -5,6 +5,14 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
         <item name="android:statusBarColor">@color/primary</item>
     </style>
-
     <style name="Theme.TalkMy" parent="Base.Theme.TalkMy" />
+    <style name="largeButton">
+        <item name="android:backgroundTint">@color/primary</item>
+    </style>
+    <style name="circleButton">
+        <item name="android:backgroundTint">@color/primary</item>
+    </style>
+    <style name="header">
+        <item name="android:background">@color/primary</item>
+    </style>
 </resources>

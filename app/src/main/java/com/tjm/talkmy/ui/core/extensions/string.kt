@@ -1,31 +1,20 @@
 package com.tjm.talkmy.ui.core.extensions
 
+
 fun String.separateSentences(): List<String> {
     return this
-        .replace(Regex("(<([^>]+)>)"), "")
-        .split(Regex("(?<=\\.)\\s+"))
+        .split(Regex("(?<=\\.)(?=[A-Z])|(?<=\\.)\\n|\\n"))
+        .map { it.split(Regex("(?<=\\.)\\s+")) }
+        .flatten()
 }
-
-
-/*
-* var texto:List<String>
-    try {
-        texto = this
-            .replace(Regex("(<([^>]+)>)"), "")
-            .split(Regex("[^.]+[.]{0,1}"))
-        /*
-        .split(Regex("(?<=\\.)(?=[A-Z])|(?<=\\.)\\s{2,}|(?<=\\.)\\n"))
-        .map {
-            it
-                .split(Regex("[^.]+[.]{0,1}"))
-                .map { oracion -> oracion }//hacer otra separacion aqui
-                .joinToString("")
-        }
-         */
-        Log.i("extension process", texto.toString())
-    } catch (e: Exception) {
-        Log.i("extension", e.toString())
-        return null
-    }
-    Log.i("extension succes", texto.toString())
-* */
+fun String.translateHTMLtoPlain():String{
+    val regex = Regex("""<(p|li|h1)\b[^<]*(?:(?!<\/\1>)<[^<]*)*<\/\1>""")
+    val paragraphs = regex.findAll(this).map { it.value }
+    val filteredParagraphs = paragraphs.map { it.replace(Regex("""<[^>]+>"""), "") }
+        .filter { it != "" }
+    return filteredParagraphs.joinToString("\n\n")
+}
+fun String.isURL():Boolean{
+    val regex = Regex("((http|https)://)(www\\.)?[a-zA-Z0-9@:%._\\+~#?&//=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%._\\+~#?&//=]*)")
+    return regex.matches(this)
+}

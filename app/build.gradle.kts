@@ -21,14 +21,21 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("release") {
             isMinifyEnabled = false
+            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "BASE_URL", "\"https://talkmy.vercel.app/api/\"")
+        }
+        getByName("debug"){
+            isDebuggable = true
+            buildConfigField("String", "BASE_URL", "\"https://talkmy.vercel.app/api/\"")
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -51,7 +58,7 @@ dependencies {
 
     val navVersion = "2.7.6"
     val retrofitVersion = "2.9.0"
-
+    val roomVersion = "2.6.1"
     //injexion de dependencias con dagger
     implementation("com.google.dagger:hilt-android:2.48")
     kapt("com.google.dagger:hilt-compiler:2.48")
@@ -67,6 +74,15 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:${navVersion}")
     implementation("androidx.navigation:navigation-ui-ktx:${navVersion}")
 
+    //storage
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+
+    //Logger
+    implementation("com.orhanobut:logger:2.2.0")
+    //Room
+    implementation("androidx.room:room-ktx:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
     //UnitTesting
     testImplementation("junit:junit:4.13.2")
     testImplementation ("io.kotlintest:kotlintest-runner-junit5:3.4.2")

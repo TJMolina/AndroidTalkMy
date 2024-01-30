@@ -21,7 +21,7 @@
         tools:layout="@layout/fragment_edit_task" >
         <argument
             android:name="taskToEdit"
-            app:argType="string[]"
+            app:argType="string"
             app:nullable="true" />
     </fragment>
 </navigation>

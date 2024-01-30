@@ -1,5 +1,6 @@
 package com.tjm.talkmy.ui.taskEdit
 
+import android.app.Dialog
 import android.graphics.Color
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
@@ -11,11 +12,25 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageButton
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.navArgs
+import com.tjm.talkmy.R
 import com.tjm.talkmy.databinding.FragmentEditTaskBinding
+import com.tjm.talkmy.ui.core.TTSManager
+import com.tjm.talkmy.ui.core.extensions.isURL
 import com.tjm.talkmy.ui.core.extensions.separateSentences
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Locale
 
 @AndroidEntryPoint
@@ -24,10 +39,13 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private var _binding: FragmentEditTaskBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var tts: TextToSpeech
+    private val editTaskViewModel by viewModels<EditTaskViewModel>()
 
-    private var currentSentenceIndex = 0
+    private lateinit var tts: TextToSpeech
+    private lateinit var ttsManager: TTSManager
     private var sentences: List<String>? = null
+
+    private val arg: EditTaskFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,64 +60,82 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     private fun initUI() {
+        editTaskViewModel.getTask(arg.taskToEdit, binding.etTask)
         tts = TextToSpeech(requireContext(), this)
+        ttsManager = TTSManager(tts, binding.etTask)
+        initEvents()
         initListeners()
     }
 
-    private fun initListeners() {
-        binding.ivSave.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+
+    private fun initEvents() {
+        requireActivity().onBackPressedDispatcher.addCallback(this) {
+            CoroutineScope(Dispatchers.IO).launch {
+                editTaskViewModel.saveTask(binding.etTask)
+                isEnabled = false
+                withContext(Dispatchers.Main) {
+                    requireActivity().onBackPressedDispatcher.onBackPressed()
+                }
+            }
         }
+    }
+
+    private fun initListeners() {
+        binding.ivSave.setOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
         binding.btnPlay.apply {
             isEnabled = false
             setOnClickListener { play() }
         }
+        binding.btnPageUrl.setOnClickListener { showDialog() }
     }
+
 
     private fun play() {
         sentences = binding.etTask.text.toString().separateSentences()
-        speak()
+        ttsManager.togglePlayback(sentences)
     }
 
-    // Resaltar la oración actual
-    private fun highlightSentence(currentSentence: String) {
-        val spannableString = SpannableString(binding.etTask.text.toString())
-        val start = binding.etTask.text.toString().indexOf(currentSentence)
-        val end = start + currentSentence.length
-        spannableString.setSpan(
-            BackgroundColorSpan(Color.YELLOW),
-            start,
-            end,
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-        binding.etTask.setText(spannableString)
-    }
+    private fun getTextFromUrl(url:String) {
+        editTaskViewModel.getTextFromUrl(url)
+        lifecycleScope.launch(Dispatchers.IO) {
+            editTaskViewModel.getTextFromUrlProcces.collectLatest { value ->
+                withContext(Dispatchers.Main) {
+                    if (value.isLoading) {
 
-    private fun speak() {
-        if (!sentences.isNullOrEmpty() && currentSentenceIndex < sentences!!.size) {
-            val currentSentence = sentences!![currentSentenceIndex]
-            tts?.apply {
-                speak(currentSentence, TextToSpeech.QUEUE_FLUSH, null, currentSentence)
-                setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                    override fun onStart(utteranceId: String?) {
-                        highlightSentence(currentSentence)
+                    } else if (value.error.isNotBlank()) {
+
+                    } else {
+                        binding.etTask.setText(editTaskViewModel.textGotFromUrl)
                     }
-                    override fun onDone(utteranceId: String?) {
-                        currentSentenceIndex++
-                        speak()
-                    }
-                    override fun onError(utteranceId: String?) {
-                        Log.e("tts error:", "algun error al tratar de leer.")
-                    }
-                })
+                }
             }
-        } else {
-            currentSentenceIndex = 0
         }
     }
 
-    //funcion parte de TextToSpeech
+    private fun showDialog(){
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(R.layout.dialog_insert_url)
+        val btnGetTextFromUrl = dialog.findViewById<Button>(R.id.btnGetTextFromUrl)
+        val edUrl = dialog.findViewById<EditText>(R.id.edUrl)
+        val btnCloceDialog = dialog.findViewById<ImageButton>(R.id.btnCloceDialog)
+
+        btnCloceDialog.setOnClickListener{
+            dialog.hide()
+        }
+        btnGetTextFromUrl.setOnClickListener {
+            val url = edUrl.text.toString()
+            edUrl.setTextColor(if (url.isURL()) Color.BLACK else Color.RED)
+            if (url.isNotBlank() && url.isURL()) {
+                getTextFromUrl(url)
+                dialog.hide()
+            }
+        }
+        dialog.show()
+    }
+
+
     override fun onInit(status: Int) {
+    //funcion parte de TextToSpeech
         if (status == TextToSpeech.SUCCESS) {
             val output = tts?.setLanguage(Locale.getDefault())
             if (output == TextToSpeech.LANG_MISSING_DATA || output == TextToSpeech.LANG_NOT_SUPPORTED) {
@@ -113,8 +149,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     override fun onDestroy() {
-        tts?.stop()
-        tts?.shutdown()
+        ttsManager.destroyTTS()
         super.onDestroy()
     }
 }

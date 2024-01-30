@@ -9,5 +9,9 @@
 
     <!-- EditTaskFragment -->
     <string name="editTaskHint_ES">Escribir aquí...</string>
+    <string name="toolSaveInfo_ES">Guardar</string>
+    <string name="toolPageUrl_ES">Url</string>
+    <string name="getUrl_ES">Obtener texto</string>
+    <string name="dialogUrl_ES">Url de pagina web</string>
 
 </resources>
