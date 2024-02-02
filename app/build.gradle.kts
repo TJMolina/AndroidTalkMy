@@ -83,6 +83,10 @@ dependencies {
     //Room
     implementation("androidx.room:room-ktx:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
+
+    //splash screen
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
     //UnitTesting
     testImplementation("junit:junit:4.13.2")
     testImplementation ("io.kotlintest:kotlintest-runner-junit5:3.4.2")

@@ -2,6 +2,8 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:elevation="8dp"
+    app:cardBackgroundColor="@color/secondary"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
@@ -13,9 +15,10 @@
 
         <Button
             android:id="@+id/tvTask"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:textAllCaps="false"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@android:color/transparent"
             android:ellipsize="end"
             android:gravity="start|top"
             android:textColor="@color/text"
@@ -53,12 +56,12 @@
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btnDeleteTask"
+                    style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_margin="1dp"
                     android:drawableLeft="@drawable/ic_delete"
                     android:drawableTint="@color/text"
-                    android:background="@color/secondary"
                     android:paddingLeft="16dp" />
             </androidx.cardview.widget.CardView>
 
@@ -75,10 +78,10 @@
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btnCompleteTask"
+                    style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_margin="1dp"
-                    android:background="@color/secondary"
                     android:drawableLeft="@drawable/ic_check"
                     android:drawableTint="@color/text"
                     android:paddingLeft="16dp" />

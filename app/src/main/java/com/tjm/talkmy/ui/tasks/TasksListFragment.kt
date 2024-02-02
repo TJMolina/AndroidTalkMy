@@ -1,7 +1,6 @@
 package com.tjm.talkmy.ui.tasks
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.orhanobut.logger.Logger
 import com.tjm.talkmy.databinding.FragmentTasksListBinding
 import com.tjm.talkmy.ui.tasks.adapter.TaskAdapter
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,6 +26,7 @@ class TasksListFragment : Fragment() {
     private val binding get() = _binding!!
     private val tasksListViewModel by viewModels<TasksListViewModel>()
     private lateinit var taskAdapter: TaskAdapter
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -49,6 +50,8 @@ class TasksListFragment : Fragment() {
         initListeners()
         initRecyclerView()
     }
+
+
 
 
     private fun initListeners() {

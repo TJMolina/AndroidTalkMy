@@ -28,11 +28,11 @@ class TasksListViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.Main) {
             val response = withContext(Dispatchers.IO) { getTasksUseCase() }
 
-            if(!response.isNullOrEmpty()){
-                _state.value = TasksState(tasksList = response.toMutableList())
+            if(response.isNullOrEmpty()){
+                _state.value = TasksState(error = "ha ocurrido un error")
             }
             else{
-                _state.value = TasksState(error = "ha ocurrido un error")
+                _state.value = TasksState(tasksList = response.reversed().toMutableList())
             }
         }
     }

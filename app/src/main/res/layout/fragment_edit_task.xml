@@ -5,89 +5,61 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.taskEdit.EditTaskFragment">
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/toolBar"
-        style="@style/header"
-        android:layout_width="0dp"
-        android:layout_height="?attr/actionBarSize"
-        android:padding="8sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/containerLogo"
-            android:layout_width="wrap_content"
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <com.google.android.material.appbar.MaterialToolbar
+                app:title="@string/app_title"
+                app:titleTextAppearance="@style/title"
+                android:id="@+id/topAppBar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:menu="@menu/top_app_bar"
+                android:background="@color/primary"
+                style="@style/Widget.MaterialComponents.Toolbar.Primary"
+                />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <!-- Note: A RecyclerView can also be used -->
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_constraintEnd_toStartOf="@id/toolsContainer"
-            app:layout_constraintHorizontal_chainStyle="spread_inside"
-            app:layout_constraintStart_toStartOf="@id/toolBar">
+            android:clickable="false"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="TalkMy!"
-                android:textColor="@color/white"
-                android:textSize="30sp" />
-        </androidx.appcompat.widget.LinearLayoutCompat>
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/toolsContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            app:layout_constraintEnd_toEndOf="@+id/toolBar"
-            app:layout_constraintStart_toEndOf="@id/containerLogo">
+                <EditText
+                    android:id="@+id/etTask"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:contextClickable="false"
+                    android:gravity="top|start"
+                    android:hint="@string/editTaskHint_ES"
+                    android:inputType="textMultiLine"
+                    android:minHeight="600dp"
+                    android:paddingHorizontal="8dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="100dp"
+                    android:textColor="@color/text"
+                    android:textSize="22sp" />
 
-            <Button
-                android:id="@+id/btnPageUrl"
-                android:contentDescription="@string/toolPageUrl_ES"
-                android:layout_width="34dp"
-                android:layout_height="40dp"
-                android:paddingRight="0dp"
-                android:paddingLeft="6dp"
-                android:backgroundTint="@color/primary"
-                app:cornerRadius="50dp"
-                app:icon="@drawable/ic_cloud"
-                app:iconSize="25dp"
-                app:iconTint="@color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-            <Button
-                android:id="@+id/ivSave"
-                android:contentDescription="@string/toolSaveInfo_ES"
-                android:layout_width="34dp"
-                android:layout_height="40dp"
-                android:paddingRight="0dp"
-                android:paddingLeft="6dp"
-                android:backgroundTint="@color/primary"
-                app:cornerRadius="50dp"
-                app:icon="@drawable/ic_save"
-                app:iconSize="25dp"
-                app:iconTint="@color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-        </androidx.appcompat.widget.LinearLayoutCompat>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.appcompat.widget.LinearLayoutCompat>
 
-    <EditText
-        android:id="@+id/etTask"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:backgroundTint="@color/white"
-        android:gravity="start"
-        android:hint="@string/editTaskHint_ES"
-        android:padding="8dp"
-        android:paddingBottom="100dp"
-        android:scrollbarStyle="outsideInset"
-        android:scrollbars="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolBar" />
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/linearLayoutCompat"
@@ -102,6 +74,20 @@
             style="@style/circleButton"
             android:layout_width="63dp"
             android:layout_height="70dp"
+            app:cornerRadius="50dp"
+            app:icon="@drawable/ic_pause_grosor_lines"
+            app:iconSize="23dp"
+            android:paddingLeft="20dp"
+            app:iconTint="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/btnPause"
+            style="@style/circleButton"
+            android:layout_width="63dp"
+            android:layout_height="70dp"
             android:paddingLeft="9dp"
             android:paddingRight="0dp"
             app:cornerRadius="50dp"
@@ -110,7 +96,23 @@
             app:iconTint="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/circularProgressBar"
+        tools:visibility="visible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:indicatorColor="@color/primary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

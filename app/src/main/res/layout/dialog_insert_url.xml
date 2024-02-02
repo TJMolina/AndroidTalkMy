@@ -21,6 +21,8 @@
                 android:layout_height="wrap_content"
                 android:padding="1dp"
                 android:src="@drawable/ic_close"
+                android:tint="@color/text"
+                android:tooltipText="Cerrar"
                 android:scaleType="fitStart"
                 />
 
@@ -30,16 +32,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/dialogUrl_ES"
+            android:textColor="@color/text"
             android:textSize="20dp"
             android:textStyle="bold" />
         <EditText
             android:id="@+id/edUrl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/hint"
             android:hint="https://example.com"
             android:textColor="@color/text"
             android:textColorHint="@color/hint"
+            android:inputType="textUri"
             />
         <Button
             android:id="@+id/btnGetTextFromUrl"
@@ -47,6 +50,7 @@
             android:layout_height="wrap_content"
             android:backgroundTint="@color/primary"
             android:text="@string/getUrl_ES"
+            android:textColor="@color/white"
             app:cornerRadius="0dp" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 </androidx.cardview.widget.CardView>

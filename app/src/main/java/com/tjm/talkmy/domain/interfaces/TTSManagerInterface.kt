@@ -10,13 +10,17 @@ import android.util.Log
 import android.widget.EditText
 
 interface TTSManagerInterface {
-    fun togglePlayback(sentences: List<String>?)
+    //fun togglePlayback(sentences: List<String>?, editText: EditText)
 
-    fun speak(sentences: List<String>?)
+    fun togglePlayback(sentences: String?, editText: EditText)
+
+
+    fun speak(sentences: List<String>, editText: EditText)
 
     fun pause()
 
-    fun highlightSentence(currentSentence: String, editText: EditText)
-
+    fun highlightSentence(start:Int, currentSentence: String, editText: EditText)
     fun destroyTTS()
+
+    fun playFromClickPosition(start: Int)
 }
