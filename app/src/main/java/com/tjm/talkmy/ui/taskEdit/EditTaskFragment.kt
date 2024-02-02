@@ -179,14 +179,17 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         lifecycleScope.launch(Dispatchers.IO) {
             ttsManager._isPlaying.collect { value ->
                 if (value.isSpeaking) {
-                    Logger.i("is speaking")
                     withContext(Dispatchers.Main) {
+                        binding.etTask.isEnabled = false
+                        binding.btnPlay.visibility = View.INVISIBLE
                         binding.btnPause.visibility = View.VISIBLE
                     }
                 } else if (value.error.isNotBlank()) {
 
                 } else {
                     withContext(Dispatchers.Main) {
+                        binding.etTask.isEnabled = true
+                        binding.btnPlay.visibility = View.VISIBLE
                         binding.btnPause.visibility = View.INVISIBLE
                     }
                 }

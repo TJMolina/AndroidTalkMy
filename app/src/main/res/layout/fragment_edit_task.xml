@@ -70,13 +70,14 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
-            android:id="@+id/btnPlay"
+            android:id="@+id/btnPause"
             style="@style/circleButton"
             android:layout_width="63dp"
             android:layout_height="70dp"
             app:cornerRadius="50dp"
             app:icon="@drawable/ic_pause_grosor_lines"
             app:iconSize="23dp"
+            android:visibility="invisible"
             android:paddingLeft="20dp"
             app:iconTint="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -84,7 +85,7 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <Button
-            android:id="@+id/btnPause"
+            android:id="@+id/btnPlay"
             style="@style/circleButton"
             android:layout_width="63dp"
             android:layout_height="70dp"
