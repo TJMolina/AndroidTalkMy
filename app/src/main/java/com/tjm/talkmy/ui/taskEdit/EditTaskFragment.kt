@@ -2,6 +2,7 @@ package com.tjm.talkmy.ui.taskEdit
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
@@ -23,7 +24,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import com.orhanobut.logger.Logger
 import com.tjm.talkmy.R
 import com.tjm.talkmy.databinding.FragmentEditTaskBinding
 import com.tjm.talkmy.domain.models.Task
@@ -112,7 +112,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private fun initEvents() {
         requireActivity().onBackPressedDispatcher.addCallback(this) {
             CoroutineScope(Dispatchers.IO).launch {
-                editTaskViewModel.saveTask(binding.etTask)
+                save()
                 taskIsSaved = true
                 isEnabled = false
                 withContext(Dispatchers.Main) {
@@ -139,16 +139,22 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
             }
             false
         }
+        requireActivity().addOnNewIntentListener {
+            val url = it.getStringExtra(Intent.EXTRA_TEXT)
+            if (!url.isNullOrEmpty()) {
+                save(true)
+                getTextFromUrl(url)
+            }
+        }
     }
 
-    override fun onPause() {
-        super.onPause()
-        editTaskViewModel.taskBeingEditing =
-            Task(UUID.randomUUID().toString(), "")
-        if (!taskIsSaved) {
-            lifecycleScope.launch(Dispatchers.IO) {
-                editTaskViewModel.saveTask(binding.etTask)
-            }
+    private fun save(createAndReemplaze: Boolean = false) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            editTaskViewModel.saveTask(binding.etTask)
+        }
+        if(createAndReemplaze){
+            editTaskViewModel.taskBeingEditing =
+                Task(UUID.randomUUID().toString(), "")
         }
     }
 

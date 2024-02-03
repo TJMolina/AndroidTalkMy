@@ -18,8 +18,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+
     private lateinit var binding: ActivityMainBinding
-    private var firstTime = true
     override fun onCreate(savedInstanceState: Bundle?) {
         val screenSplash = installSplashScreen()
         screenSplash.setKeepOnScreenCondition { false }
@@ -35,13 +35,9 @@ class MainActivity : AppCompatActivity() {
     private fun initUtils() {
         initToolbar()
         Logger.addLogAdapter(AndroidLogAdapter())
-    }
+        initSharedListener(intent.getStringExtra(Intent.EXTRA_TEXT))
 
-    override fun onResume() {
-        initSharedListener()
-        super.onResume()
     }
-
 
     private fun initToolbar() {
         addMenuProvider(object : MenuProvider {
@@ -54,16 +50,25 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
-    private fun initSharedListener() {
-        val urlCompartido = intent.getStringExtra(Intent.EXTRA_TEXT)
-        if (!urlCompartido.isNullOrEmpty()) {
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+    }
+    private fun initSharedListener(url:String?) {
+        if (!url.isNullOrEmpty()) {
+            val fragmentTag = "EditTaskFragment"
+            val existingFragment = supportFragmentManager.findFragmentByTag(fragmentTag)
+            if (existingFragment != null) {
+                supportFragmentManager.beginTransaction().remove(existingFragment).commit()
+            }
+
             val fragment = EditTaskFragment().apply {
                 arguments = Bundle().apply {
-                    putString("url", urlCompartido)
+                    putString("url", url)
                 }
             }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainerView, fragment, fragmentTag)
                 .addToBackStack(null)
                 .commit()
         }
@@ -72,6 +77,7 @@ class MainActivity : AppCompatActivity() {
                 "nothig",
                 ""
             )
-        }) // Elimina el extra del intent después de usarlo
+        })
     }
+
 }
