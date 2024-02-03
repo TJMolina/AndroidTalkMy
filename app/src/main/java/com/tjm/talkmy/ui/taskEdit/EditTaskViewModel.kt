@@ -1,10 +1,8 @@
 package com.tjm.talkmy.ui.taskEdit
 
-import android.view.View
 import android.widget.EditText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.orhanobut.logger.Logger
 import com.tjm.talkmy.core.ResponseState
 import com.tjm.talkmy.domain.models.Task
 import com.tjm.talkmy.domain.useCases.getTaskUseCase
@@ -18,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,14 +31,13 @@ class EditTaskViewModel @Inject constructor(
     val getTextFromUrlProcces: StateFlow<LoadingErrorState> = _getTextFromUrlProcces
     var textGotFromUrl: String? = null
     suspend fun saveTask(edText: EditText) {
-        if (edText.text.isBlank()) {
+
+        taskBeingEditing = Task(nota = edText.text.toString())
+
+        if (taskBeingEditing.nota.isEmpty()) {
             return
         }
-        if (taskBeingEditing.id.isNullOrEmpty()) {
-            taskBeingEditing = Task(nota = edText.text.toString())
-        } else {
-            taskBeingEditing!!.nota = edText.text.toString()
-        }
+
         uploadTaskUseCasea(taskBeingEditing!!)
     }
 
@@ -75,7 +73,7 @@ class EditTaskViewModel @Inject constructor(
     }
 
 
-    fun getPositionClicked(editText:EditText, position: Int,ttsManager: TTSManager) {
+    fun getPositionClicked(editText: EditText, position: Int, ttsManager: TTSManager) {
         val text = editText.text.toString()
 
         // Buscar el índice del punto (.) más cercano antes y después del cursor

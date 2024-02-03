@@ -53,14 +53,20 @@ class MainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+        intent?.let {
+            val argument = it.getStringExtra(Intent.EXTRA_TEXT)
+            val fragment = supportFragmentManager.findFragmentByTag("EditTaskFragment")
+            if (fragment != null && fragment is EditTaskFragment) {
+                fragment.recivedUrl(argument!!)
+            }
+            else{
+                initSharedListener(argument)
+            }
+        }
     }
     private fun initSharedListener(url:String?) {
         if (!url.isNullOrEmpty()) {
             val fragmentTag = "EditTaskFragment"
-            val existingFragment = supportFragmentManager.findFragmentByTag(fragmentTag)
-            if (existingFragment != null) {
-                supportFragmentManager.beginTransaction().remove(existingFragment).commit()
-            }
 
             val fragment = EditTaskFragment().apply {
                 arguments = Bundle().apply {

@@ -26,7 +26,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.tjm.talkmy.R
 import com.tjm.talkmy.databinding.FragmentEditTaskBinding
-import com.tjm.talkmy.domain.models.Task
 import com.tjm.talkmy.ui.core.TTSManager
 import com.tjm.talkmy.ui.core.extensions.isURL
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,7 +35,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
-import java.util.UUID
 
 @AndroidEntryPoint
 class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
@@ -45,7 +43,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private val binding get() = _binding!!
 
     private val editTaskViewModel by viewModels<EditTaskViewModel>()
-    private var taskIsSaved: Boolean = false
 
     private lateinit var tts: TextToSpeech
     private lateinit var ttsManager: TTSManager
@@ -112,8 +109,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private fun initEvents() {
         requireActivity().onBackPressedDispatcher.addCallback(this) {
             CoroutineScope(Dispatchers.IO).launch {
-                save()
-                taskIsSaved = true
+                editTaskViewModel.saveTask(binding.etTask)
                 isEnabled = false
                 withContext(Dispatchers.Main) {
                     requireActivity().onBackPressedDispatcher.onBackPressed()
@@ -139,30 +135,22 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
             }
             false
         }
-        requireActivity().addOnNewIntentListener {
-            val url = it.getStringExtra(Intent.EXTRA_TEXT)
-            if (!url.isNullOrEmpty()) {
-                save(true)
-                getTextFromUrl(url)
-            }
-        }
-    }
-
-    private fun save(createAndReemplaze: Boolean = false) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            editTaskViewModel.saveTask(binding.etTask)
-        }
-        if(createAndReemplaze){
-            editTaskViewModel.taskBeingEditing =
-                Task(UUID.randomUUID().toString(), "")
-        }
     }
 
     private fun play() {
         ttsManager.togglePlayback(binding.etTask.text.toString(), binding.etTask)
     }
 
-    private fun getTextFromUrl(url: String) {
+    fun recivedUrl(url:String?){
+        if (!url.isNullOrEmpty()) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                editTaskViewModel.saveTask(binding.etTask)
+                getTextFromUrl(url)
+            }
+        }
+    }
+
+     private fun getTextFromUrl(url: String) {
         editTaskViewModel.getTextFromUrl(url)
         lifecycleScope.launch(Dispatchers.IO) {
             editTaskViewModel.getTextFromUrlProcces.collectLatest { value ->
