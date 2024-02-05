@@ -8,7 +8,7 @@ import com.tjm.talkmy.domain.models.Task
 import com.tjm.talkmy.domain.useCases.getTaskUseCase
 import com.tjm.talkmy.domain.useCases.onlineUseCases.GetTextFromUrlUseCase
 import com.tjm.talkmy.domain.useCases.uploadTaskUseCasea
-import com.tjm.talkmy.ui.core.TTSManager
+import com.tjm.talkmy.ui.taskEdit.managers.TTSManager
 import com.tjm.talkmy.ui.core.states.LoadingErrorState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,13 +30,10 @@ class EditTaskViewModel @Inject constructor(
     val getTextFromUrlProcces: StateFlow<LoadingErrorState> = _getTextFromUrlProcces
     var textGotFromUrl: String? = null
     suspend fun saveTask(edText: EditText) {
-
-        taskBeingEditing = Task(nota = edText.text.toString())
-
+        taskBeingEditing = Task(id =  taskBeingEditing.id, nota = edText.text.toString())
         if (taskBeingEditing.nota.isEmpty()) {
             return
         }
-
         uploadTaskUseCasea(taskBeingEditing!!)
     }
 
@@ -62,7 +58,7 @@ class EditTaskViewModel @Inject constructor(
                 }
 
                 is ResponseState.Error -> {
-                    _getTextFromUrlProcces.value = LoadingErrorState(error = "Error")
+                    _getTextFromUrlProcces.value = LoadingErrorState(error = it.toString())
                 }
 
                 is ResponseState.Loading -> {
@@ -72,6 +68,9 @@ class EditTaskViewModel @Inject constructor(
         }
     }
 
+    fun getTextFromPDF(){
+
+    }
 
     fun getPositionClicked(editText: EditText, position: Int, ttsManager: TTSManager) {
         val text = editText.text.toString()

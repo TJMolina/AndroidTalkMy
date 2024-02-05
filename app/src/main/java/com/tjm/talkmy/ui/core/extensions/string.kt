@@ -10,14 +10,9 @@ fun String.separateSentences(): List<String> =
 fun String.translateHTMLtoPlain(): String =
     Regex("""<(p|li|h1)\b[^<]*(?:(?!<\/\1>)<[^<]*)*<\/\1>""")
         .findAll(this)
-        .map { it.value.replace(Regex("""<[^>]+>"""), "").replace(Regex("""\s{2,}""")," ") }
-        .filter { it.trim().isNotBlank() }
+        .map { it.value.replace(Regex("""<[^>]+>"""), "").replace(Regex("""\s{2,}""")," ").trim() }
+        .filter { it.isNotBlank() }
         .joinToString("\n\n")
-
-
-
-
-
 
 fun String.isURL() =
     Regex("((http|https)://)(www\\.)?[a-zA-Z0-9@:%._\\+~#?&//=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%._\\+~#?&//=]*)")

@@ -1,9 +1,6 @@
 package com.tjm.talkmy.ui.taskEdit
 
 import android.annotation.SuppressLint
-import android.app.Dialog
-import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.util.Log
@@ -14,9 +11,8 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageButton
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -24,10 +20,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import com.orhanobut.logger.Logger
 import com.tjm.talkmy.R
 import com.tjm.talkmy.databinding.FragmentEditTaskBinding
-import com.tjm.talkmy.ui.core.TTSManager
-import com.tjm.talkmy.ui.core.extensions.isURL
+import com.tjm.talkmy.domain.models.AllPreferences
+import com.tjm.talkmy.ui.taskEdit.managers.TTSManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,9 +40,12 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private val binding get() = _binding!!
 
     private val editTaskViewModel by viewModels<EditTaskViewModel>()
+    private val dialogsViewModel by viewModels<DialogsViewModel>()
+
 
     private lateinit var tts: TextToSpeech
     private lateinit var ttsManager: TTSManager
+
     private val arg: EditTaskFragmentArgs by navArgs()
 
     override fun onCreateView(
@@ -57,6 +57,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        dialogsViewModel.getAllPreferences()
         initUI()
     }
 
@@ -66,12 +67,14 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         getTask()
         initEvents()
         initListeners()
+        observeTextSize()
     }
 
     private fun initMenu() {
         val menuHost: MenuHost = binding.topAppBar
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                dialogsViewModel.createDialogs(requireContext()) { getTextFromUrl(it) }
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -82,7 +85,21 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                     }
 
                     R.id.btnPageUrl -> {
-                        showDialog()
+                        dialogsViewModel.urlDialog
+                        dialogsViewModel.urlDialog.show()
+                        true
+                    }
+
+                    R.id.optionsTalk -> {
+                        dialogsViewModel.talkDialog.show(parentFragmentManager, "TalkOptionsDialog")
+                        true
+                    }
+                    R.id.optionsVoices ->{
+                        dialogsViewModel.voicesDialog.show(parentFragmentManager, "TalkOptionsDialog")
+                        true
+                    }
+                    R.id.optionsTexto -> {
+                        dialogsViewModel.textSizeDialog.show(parentFragmentManager, "TextSizeOptionsDialog")
                         true
                     }
 
@@ -141,7 +158,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         ttsManager.togglePlayback(binding.etTask.text.toString(), binding.etTask)
     }
 
-    fun recivedUrl(url:String?){
+    fun recivedUrl(url: String?) {
         if (!url.isNullOrEmpty()) {
             lifecycleScope.launch(Dispatchers.IO) {
                 editTaskViewModel.saveTask(binding.etTask)
@@ -150,7 +167,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         }
     }
 
-     private fun getTextFromUrl(url: String) {
+    private fun getTextFromUrl(url: String) {
         editTaskViewModel.getTextFromUrl(url)
         lifecycleScope.launch(Dispatchers.IO) {
             editTaskViewModel.getTextFromUrlProcces.collectLatest { value ->
@@ -179,7 +196,8 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                         binding.btnPause.visibility = View.VISIBLE
                     }
                 } else if (value.error.isNotBlank()) {
-
+                    Toast.makeText(requireContext(), "Un error a ocurrido.", Toast.LENGTH_SHORT)
+                        .show()
                 } else {
                     withContext(Dispatchers.Main) {
                         binding.etTask.isEnabled = true
@@ -191,41 +209,49 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         }
     }
 
-    private fun showDialog() {
-        val dialog = Dialog(requireContext())
-        dialog.setContentView(R.layout.dialog_insert_url)
-        val btnGetTextFromUrl = dialog.findViewById<Button>(R.id.btnGetTextFromUrl)
-        val edUrl = dialog.findViewById<EditText>(R.id.edUrl)
-        val btnCloceDialog = dialog.findViewById<ImageButton>(R.id.btnCloceDialog)
-
-        btnCloceDialog.setOnClickListener {
-            dialog.hide()
-        }
-        btnGetTextFromUrl.setOnClickListener {
-            val url = edUrl.text.toString()
-            edUrl.setTextColor(if (url.isURL()) Color.BLACK else Color.RED)
-            if (url.isNotBlank() && url.isURL()) {
-                getTextFromUrl(url)
-                dialog.hide()
+    private fun observeTextSize() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            dialogsViewModel.preferences.collectLatest {
+                withContext(Dispatchers.Main) {
+                    binding.etTask.textSize = it.textSize
+                }
             }
         }
-        dialog.show()
     }
 
     override fun onInit(status: Int) {
-        //funcion parte de TextToSpeech
-        if (status == TextToSpeech.SUCCESS) {
-            val output = tts.setLanguage(Locale.getDefault())
-            if (output == TextToSpeech.LANG_MISSING_DATA || output == TextToSpeech.LANG_NOT_SUPPORTED) {
-                Log.i("yo", "error con lo del idioma")
-            } else {
-                binding.btnPlay.isEnabled = true
-                binding.btnPause.isEnabled = true
-                observeIsplaying()
+        lifecycleScope.launch(Dispatchers.IO) {
+            dialogsViewModel.preferences.collectLatest { preferences ->
+                if (status == TextToSpeech.SUCCESS) {
+                    val output = tts.setLanguage(Locale.getDefault())
+                    if (output == TextToSpeech.LANG_MISSING_DATA || output == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Log.i("yo", "Error con el idioma")
+                    } else {
+                        applyTtsPreferences(tts, preferences)
+                        withContext(Dispatchers.Main) {
+                            binding.btnPlay.isEnabled = true
+                            binding.btnPause.isEnabled = true
+                        }
+                        observeIsplaying()
+                        dialogsViewModel.createSelectVoicesDialog(tts, requireContext())
+                    }
+                } else {
+                    Log.i("yo", "Error con el TTS")
+                }
             }
-        } else {
-            Log.i("yo", "error con el tts")
         }
+    }
+
+    private fun applyTtsPreferences(tts: TextToSpeech, preferences: AllPreferences) {
+        val speechRate = preferences.speech
+        val velocity = preferences.velocity
+        val voice = preferences.voice
+        val selectedVoice = tts.voices.firstOrNull { it.name == voice }
+        if (selectedVoice != null) {
+            tts.voice = selectedVoice
+        }
+        tts.setSpeechRate(velocity)
+        tts.setPitch(speechRate)
     }
 
     override fun onDestroy() {

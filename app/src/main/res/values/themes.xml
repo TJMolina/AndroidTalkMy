@@ -1,9 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.TalkMy" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
         <item name="android:statusBarColor">@color/primary</item>
+        <item name="android:textColorHighlight">@color/highlit</item>
     </style>
 
     <style name="Theme.TalkMy" parent="Base.Theme.TalkMy" />
@@ -16,9 +15,11 @@
         <item name="android:backgroundTint">@color/primary</item>
     </style>
 
-    <style name="header">
+
+    <style name="header" parent="Widget.MaterialComponents.Toolbar.Primary">
         <item name="android:background">@color/primary</item>
     </style>
+
 
     <style name="Theme.API_Splash_Screen" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/primary</item>
@@ -29,5 +30,6 @@
     <style name="title">
         <item name="android:textSize">30dp</item>
     </style>
+
 
 </resources>

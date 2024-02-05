@@ -27,9 +27,18 @@
         android:contentDescription="Importar un archivo pdf o txt."
         app:showAsAction="never" />
     <item
-        android:id="@+id/options"
-        android:title="Opciones"
-        android:contentDescription=""
+        android:id="@+id/optionsTexto"
+        android:title="Texto"
+        android:contentDescription="Opciones de texto"
         app:showAsAction="never" />
-
+    <item
+        android:id="@+id/optionsVoices"
+        android:title="Lenguaje"
+        android:contentDescription="Elije tts"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/optionsTalk"
+        android:title="Voz"
+        android:contentDescription="Opciones de voz"
+        app:showAsAction="never"/>
 </menu>
