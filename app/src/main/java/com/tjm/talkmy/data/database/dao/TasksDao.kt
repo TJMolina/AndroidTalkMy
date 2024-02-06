@@ -8,7 +8,7 @@ import com.tjm.talkmy.data.database.entities.TaskEntitiy
 
 @Dao
 interface TasksDao {
-    @Query("SELECT * FROM tasks_table")
+    @Query("SELECT * FROM tasks_table ORDER BY  fecha ASC")
     suspend fun getAllTasks():List<TaskEntitiy>
 
     @Query("SELECT * FROM tasks_table WHERE id = :idTask")

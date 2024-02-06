@@ -3,6 +3,7 @@
     <style name="Base.Theme.TalkMy" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">@color/primary</item>
         <item name="android:textColorHighlight">@color/highlit</item>
+        <item name="colorControlActivated">@color/primary</item>
     </style>
 
     <style name="Theme.TalkMy" parent="Base.Theme.TalkMy" />

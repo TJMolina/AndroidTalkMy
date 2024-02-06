@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.tjm.talkmy.core.ResponseState
 import com.tjm.talkmy.domain.models.Task
 import com.tjm.talkmy.domain.useCases.getTaskUseCase
+import com.tjm.talkmy.domain.useCases.getTasksUseCase
 import com.tjm.talkmy.domain.useCases.onlineUseCases.GetTextFromUrlUseCase
 import com.tjm.talkmy.domain.useCases.uploadTaskUseCasea
 import com.tjm.talkmy.ui.taskEdit.managers.TTSManager
@@ -20,57 +21,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EditTaskViewModel @Inject constructor(
-    private val uploadTaskUseCasea: uploadTaskUseCasea,
-    private val getTaskUseCase: getTaskUseCase,
-    private val getTextFromUrlUseCase: GetTextFromUrlUseCase
 ) :
     ViewModel() {
-    var taskBeingEditing = Task(nota = "")
-    private var _getTextFromUrlProcces = MutableStateFlow(LoadingErrorState())
-    val getTextFromUrlProcces: StateFlow<LoadingErrorState> = _getTextFromUrlProcces
-    var textGotFromUrl: String? = null
-    suspend fun saveTask(edText: EditText) {
-        taskBeingEditing = Task(id =  taskBeingEditing.id, nota = edText.text.toString())
-        if (taskBeingEditing.nota.isEmpty()) {
-            return
-        }
-        uploadTaskUseCasea(taskBeingEditing!!)
-    }
-
-    fun getTask(id: String?, edText: EditText) {
-        if (!id.isNullOrEmpty()) {
-            viewModelScope.launch(Dispatchers.IO) {
-                getTaskUseCase(id)?.let { task ->
-                    taskBeingEditing = task
-                    withContext(Dispatchers.Main) { edText.setText(task.nota) }
-                }
-            }
-        }
-    }
-
-
-    fun getTextFromUrl(url: String) = viewModelScope.launch(Dispatchers.IO) {
-        getTextFromUrlUseCase(url).collect {
-            when (it) {
-                is ResponseState.Success -> {
-                    textGotFromUrl = it.data
-                    _getTextFromUrlProcces.value = LoadingErrorState(isLoading = false)
-                }
-
-                is ResponseState.Error -> {
-                    _getTextFromUrlProcces.value = LoadingErrorState(error = it.toString())
-                }
-
-                is ResponseState.Loading -> {
-                    _getTextFromUrlProcces.value = LoadingErrorState(isLoading = true)
-                }
-            }
-        }
-    }
-
-    fun getTextFromPDF(){
-
-    }
 
     fun getPositionClicked(editText: EditText, position: Int, ttsManager: TTSManager) {
         val text = editText.text.toString()
@@ -93,5 +45,9 @@ class EditTaskViewModel @Inject constructor(
         val startIndex = closestIndex + 1
 
         ttsManager.playFromClickPosition(startIndex)
+    }
+
+    fun readNextTask(){
+
     }
 }

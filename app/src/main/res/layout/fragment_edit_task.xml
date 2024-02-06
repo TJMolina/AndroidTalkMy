@@ -53,7 +53,8 @@
                     android:paddingTop="8dp"
                     android:paddingBottom="100dp"
                     android:textColor="@color/text"
-                    android:textSize="22sp" />
+                    android:textSize="22sp"
+                    />
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 

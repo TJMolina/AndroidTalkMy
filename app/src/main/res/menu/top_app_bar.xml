@@ -32,13 +32,20 @@
         android:contentDescription="Opciones de texto"
         app:showAsAction="never" />
     <item
-        android:id="@+id/optionsVoices"
-        android:title="Lenguaje"
-        android:contentDescription="Elije tts"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/optionsTalk"
-        android:title="Voz"
+        android:title="Opciones de voz"
         android:contentDescription="Opciones de voz"
-        app:showAsAction="never"/>
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/optionsTalk"
+                android:title="Volumen, tono, velocidad"
+                android:contentDescription="Opciones de voz"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/optionsVoices"
+                android:title="Voz"
+                android:contentDescription="Elije tts"
+                app:showAsAction="never"/>
+        </menu>
+    </item>
 </menu>

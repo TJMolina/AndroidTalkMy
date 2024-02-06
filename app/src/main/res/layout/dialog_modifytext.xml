@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
     <androidx.cardview.widget.CardView
         android:layout_width="300dp"
         android:layout_height="wrap_content"
@@ -15,7 +14,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         >
-
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -41,12 +39,13 @@
                     android:id="@+id/rsTextSizeTextDialog"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:stepSize="1.0"
+                    android:stepSize="0.5"
                     android:valueFrom="10.0"
                     android:valueTo="39.0"
                     app:thumbColor="@color/primary"
                     app:tickColorInactive="@color/primary"
-                    app:trackColorActive="@color/primary" />
+                    app:trackColorActive="@color/primary"
+                    />
 
                 <TextView
                     android:id="@+id/tvPreviTextDialog"
@@ -54,7 +53,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:hint="Previsualizacion"
-                    android:textSize="39sp" />
+                    android:textSize="39.0sp" />
             </androidx.appcompat.widget.LinearLayoutCompat>
 
             <androidx.appcompat.widget.LinearLayoutCompat
@@ -82,6 +81,5 @@
                     android:textSize="14sp" />
             </androidx.appcompat.widget.LinearLayoutCompat>
         </androidx.constraintlayout.widget.ConstraintLayout>
-
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

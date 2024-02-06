@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.tjm.talkmy.R
 import com.tjm.talkmy.domain.interfaces.TTSManagerInterface
+import com.tjm.talkmy.domain.models.AllPreferences
 import com.tjm.talkmy.ui.core.extensions.separateSentences
 import com.tjm.talkmy.ui.core.states.SpeakingState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,7 +58,7 @@ class TTSManager(private val tts: TextToSpeech, private val context: FragmentAct
                         if (currentSentenceIndex == sentences.size - 1) {
                             currentSentenceIndex = 0
                             playSince = 0
-                            isPlaying.value = SpeakingState(isSpeaking = false)
+                            isPlaying.value = SpeakingState(finalized = true)
                         } else {
                             currentSentenceIndex++
                             speak(sentences, editText)
@@ -97,6 +98,10 @@ class TTSManager(private val tts: TextToSpeech, private val context: FragmentAct
         //resalto el texto
         context.runOnUiThread {
             editText.setText(spannableString)
+            //editText.isEnabled = true
+            editText.setSelection(start)
+            editText.requestFocus()
+            //editText.isEnabled = false
         }
     }
 
@@ -104,6 +109,18 @@ class TTSManager(private val tts: TextToSpeech, private val context: FragmentAct
         isPlaying.value = SpeakingState(false)
         tts?.stop()
         tts?.shutdown()
+    }
+
+    override fun configTTS(preferences: AllPreferences) {
+        val speechRate = preferences.speech
+        val velocity = preferences.velocity
+        val voice = preferences.voice
+        val selectedVoice = tts.voices.firstOrNull { it.name == voice }
+        if (selectedVoice != null) {
+            tts.voice = selectedVoice
+        }
+        tts.setSpeechRate(velocity)
+        tts.setPitch(speechRate)
     }
 }
 

@@ -8,6 +8,7 @@ import android.text.SpannableString
 import android.text.style.BackgroundColorSpan
 import android.util.Log
 import android.widget.EditText
+import com.tjm.talkmy.domain.models.AllPreferences
 
 interface TTSManagerInterface {
     //fun togglePlayback(sentences: List<String>?, editText: EditText)
@@ -23,4 +24,5 @@ interface TTSManagerInterface {
     fun destroyTTS()
 
     fun playFromClickPosition(start: Int)
+    fun configTTS(preferences: AllPreferences)
 }

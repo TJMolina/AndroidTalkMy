@@ -16,16 +16,21 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.material.slider.Slider
 import com.orhanobut.logger.Logger
 import com.tjm.talkmy.R
+import com.tjm.talkmy.core.ResponseState
 import com.tjm.talkmy.data.source.preferences.Preferences
 import com.tjm.talkmy.domain.models.AllPreferences
+import com.tjm.talkmy.domain.useCases.onlineUseCases.GetTextFromUrlUseCase
 import com.tjm.talkmy.ui.core.extensions.isURL
+import com.tjm.talkmy.ui.core.states.LoadingErrorState
 import com.tjm.talkmy.ui.taskEdit.dialogs.TalkOptionsDialog
 import com.tjm.talkmy.ui.taskEdit.dialogs.TextOptionsDialog
+import com.tjm.talkmy.ui.taskEdit.dialogs.UrlDialog
 import com.tjm.talkmy.ui.taskEdit.dialogs.VoicesSelectDialog
 import com.tjm.talkmy.ui.taskEdit.managers.MyAudioManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,24 +39,28 @@ import javax.inject.Inject
 @HiltViewModel
 class DialogsViewModel @Inject constructor(
     val preferencesRepository: Preferences,
-    val audioManager: MyAudioManager
+    private val getTextFromUrlUseCase: GetTextFromUrlUseCase
+
 ) :
     ViewModel() {
     var preferences = MutableStateFlow(AllPreferences())
-    lateinit var urlDialog: Dialog
 
     val textSizeDialog = TextOptionsDialog()
     val talkDialog = TalkOptionsDialog()
     val voicesDialog = VoicesSelectDialog()
+    val urlDialog = UrlDialog()
+    private var _getTextFromUrlProcces = MutableStateFlow(LoadingErrorState())
+    val getTextFromUrlProcces: StateFlow<LoadingErrorState> = _getTextFromUrlProcces
+    var textGotFromUrl: String? = null
+
 
     init {
         getAllPreferences()
     }
 
-    fun createDialogs(context: Context, getTextFromUrl: (String) -> Unit) {
-        createTalkDialog()
+    fun createDialogs() {
         createTextDialog()
-        createURLDialog(context, getTextFromUrl)
+        configUrlDialog()
     }
 
     fun getAllPreferences() {
@@ -68,41 +77,8 @@ class DialogsViewModel @Inject constructor(
         }
     }
 
-
-    fun createURLDialog(context: Context, getTextFromUrl: (String) -> Unit) {
-        urlDialog = Dialog(context)
-        urlDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        urlDialog.setContentView(R.layout.dialog_insert_url)
-
-        val btnGetTextFromUrl = urlDialog.findViewById<Button>(R.id.btnGetTextFromUrl)
-        val edUrl = urlDialog.findViewById<EditText>(R.id.edUrl)
-        val btnCloceDialog = urlDialog.findViewById<ImageButton>(R.id.btnCloceDialog)
-
-        btnCloceDialog.setOnClickListener {
-            urlDialog.dismiss()
-        }
-        btnGetTextFromUrl.setOnClickListener {
-            val url = edUrl.text.toString()
-            edUrl.setTextColor(if (url.isURL()) Color.BLACK else Color.RED)
-            if (url.isNotBlank() && url.isURL()) {
-                urlDialog.dismiss()
-                getTextFromUrl(url)
-            }
-        }
-    }
-
      fun createSelectVoicesDialog(tts: TextToSpeech, context: Context) {
         voicesDialog.setListener(object : VoicesSelectDialog.ConfigSelectVoiceDialog {
-            override fun onApplyButtonClick() {
-                viewModelScope.launch(Dispatchers.IO) {
-                    preferencesRepository.saveVoicePreference(
-                        voiceName =
-                        voicesDialog.binding.voiceSpinner.selectedItem.toString()
-                    )
-                    withContext(Dispatchers.Main) { //TODO recordar implementar al tts
-                     }
-                }
-            }
 
             override fun applyAllVoices(spiner: Spinner) {
                 val voiceNames = mutableListOf<String>()
@@ -119,27 +95,6 @@ class DialogsViewModel @Inject constructor(
         })
     }
 
-    fun createTalkDialog() {
-        talkDialog.setListener(object : TalkOptionsDialog.ConfigTalkOptionsDialog {
-            override fun onApplyButtonClick(volume: Int, speech: Float, velocity: Float) {
-                viewModelScope.launch(Dispatchers.IO) {
-                    preferencesRepository.saveTalkPreferences(
-                        volume = volume,
-                        speech = speech,
-                        velocity = velocity
-                    )
-                    withContext(Dispatchers.Main) { audioManager.increaseVolume(volume) }
-                }
-            }
-
-            override fun configRangeSliders() {
-                talkDialog.binding.rsTono.value = preferences.value.speech
-                talkDialog.binding.rsVolument.value = preferences.value.volume.toFloat()
-                talkDialog.binding.rsVelocity.value = preferences.value.velocity
-            }
-        })
-    }
-
     fun createTextDialog() {
         textSizeDialog.setListener(object : TextOptionsDialog.ConfigTextOptionsDialog {
             override fun onApplyButtonClick(textSize: Float) {
@@ -153,5 +108,32 @@ class DialogsViewModel @Inject constructor(
                 textView.textSize = preferences.value.textSize
             }
         })
+    }
+
+    fun configUrlDialog(){
+        urlDialog.functions = object : UrlDialog.addFunctions{
+            override fun searchUrl(url: String) {
+                getTextFromUrl(url)
+            }
+        }
+    }
+
+    fun getTextFromUrl(url: String) = viewModelScope.launch(Dispatchers.IO) {
+        getTextFromUrlUseCase(url).collect {
+            when (it) {
+                is ResponseState.Success -> {
+                    textGotFromUrl = it.data
+                    _getTextFromUrlProcces.value = LoadingErrorState(isLoading = false)
+                }
+
+                is ResponseState.Error -> {
+                    _getTextFromUrlProcces.value = LoadingErrorState(error = it.toString())
+                }
+
+                is ResponseState.Loading -> {
+                    _getTextFromUrlProcces.value = LoadingErrorState(isLoading = true)
+                }
+            }
+        }
     }
 }

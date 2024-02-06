@@ -19,9 +19,9 @@ class PreferencesImp @Inject constructor(private val context: Context) : Prefere
     override suspend fun getPreferences() = context.dataStore.data.map {
         AllPreferences(
             textSize = it[floatPreferencesKey(PreferencesType.TEXTSIZE.name)] ?: 22.0f,
-            volume = it[intPreferencesKey(PreferencesType.VOLUME.name)] ?: 0,
-            speech = it[floatPreferencesKey(PreferencesType.SPEECH.name)] ?: 0.5f,
-            velocity = it[floatPreferencesKey(PreferencesType.VELOCITY.name)] ?: 1.0f,
+            volume = it[intPreferencesKey(PreferencesType.VOLUME.name)] ?: 10,
+            speech = it[floatPreferencesKey(PreferencesType.SPEECH.name)] ?: 1f,
+            velocity = it[floatPreferencesKey(PreferencesType.VELOCITY.name)] ?: 1f,
             voice = it[stringPreferencesKey(PreferencesType.VOICE.name)]?:""
         )
     }
