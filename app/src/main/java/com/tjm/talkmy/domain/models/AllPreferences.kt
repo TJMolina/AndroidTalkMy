@@ -5,5 +5,7 @@ data class AllPreferences(
     val volume:Int = 10,
     val speech: Float = 1f,
     val velocity: Float = 1f,
-    val voice:String = ""
+    val voice:String = "",
+    val readNextTask:Boolean = false,
+    val saveOnline:Boolean = false
 )

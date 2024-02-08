@@ -1,15 +1,17 @@
 package com.tjm.talkmy.ui.tasks
 
-import android.util.Log
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.orhanobut.logger.Logger
+import com.tjm.talkmy.domain.models.Task
 import com.tjm.talkmy.domain.useCases.DeleteTaskUseCase
 import com.tjm.talkmy.domain.useCases.getTasksUseCase
 import com.tjm.talkmy.ui.tasks.adapter.TaskAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -20,29 +22,58 @@ class TasksListViewModel @Inject constructor(
     private val deleteTaskUseCase: DeleteTaskUseCase
 ) :
     ViewModel() {
-    private var _state = MutableStateFlow(TasksState())
-    val getTaskState: StateFlow<TasksState> = _state
+    var recivedTask = mutableListOf<Task>()
+    var _recivedTask = MutableStateFlow(TasksState())
 
-    fun getLocalTasks() {
+    @SuppressLint("NotifyDataSetChanged")
+    fun getLocalTasks(taskAdapter: TaskAdapter) {
+        viewModelScope.launch(Dispatchers.IO) {
+            getTasksUseCase().collect { newTasks ->
+                if (newTasks.isNullOrEmpty()) {
+                    withContext(Dispatchers.Main) {
+                        _recivedTask.value = TasksState(error = "Ha ocurrido un error")
+                    }
+                } else {
+                    val currentTasks = taskAdapter.taskList
+                    val newSize = newTasks.size
+                    val currentSize = currentTasks.size
 
-        viewModelScope.launch(Dispatchers.Main) {
-            val response = withContext(Dispatchers.IO) { getTasksUseCase() }
-
-            if(response.isNullOrEmpty()){
-                _state.value = TasksState(error = "ha ocurrido un error")
-            }
-            else{
-                _state.value = TasksState(tasksList = response.reversed().toMutableList())
+                    if (newSize > currentSize) {
+                        if (newSize - currentSize > 1 && currentSize > 1) {
+                            Logger.d("Se añadió una nota")
+                            withContext(Dispatchers.Main) {
+                                taskAdapter.taskList.add(newTasks[newSize - 1])
+                                taskAdapter.notifyItemInserted(newSize - 1)
+                            }
+                        } else {
+                            withContext(Dispatchers.Main) {
+                                taskAdapter.taskList = newTasks.toMutableList()
+                                taskAdapter.notifyDataSetChanged()
+                            }
+                        }
+                    } else if (currentSize > 0) {
+                        for (i in 0 until minOf(currentSize, newSize)) {
+                            val currentTask = currentTasks[i]
+                            val newTask = newTasks[i]
+                            if (currentTask.nota != newTask.nota) {
+                                currentTask.nota = newTask.nota
+                                withContext(Dispatchers.Main) {
+                                    taskAdapter.notifyItemChanged(i)
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
     fun deleteTask(id: String, position: Int, taskAdapter: TaskAdapter) {
+        taskAdapter.taskList.removeAt(position)
+        taskAdapter.notifyItemRemoved(position)
         viewModelScope.launch {
             deleteTaskUseCase(id)
         }
-         _state.value.tasksList.removeAt(position)
-        taskAdapter.notifyItemRemoved(position)
     }
 
 }

@@ -6,35 +6,6 @@
     android:layout_height="wrap_content"
     tools:context=".ui.tasks.TasksListFragment">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:id="@+id/toolBar"
-        style="@style/header"
-        android:layout_width="0dp"
-        android:layout_height="?attr/actionBarSize"
-        android:padding="8sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_chainStyle="spread_inside"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="TalkMy!"
-                android:textColor="@color/white"
-                android:textSize="30sp" />
-        </androidx.appcompat.widget.LinearLayoutCompat>
-
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"></androidx.appcompat.widget.LinearLayoutCompat>
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -51,6 +22,25 @@
             android:paddingBottom="66dp" />
     </ScrollView>
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        >
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBarTaskList"
+            style="@style/header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:menu="@menu/menu_taskslist"
+            app:title="@string/app_title"
+            app:titleTextAppearance="@style/title"
+            app:titleTextColor="@color/white" />
+
+    </com.google.android.material.appbar.AppBarLayout>
     <Button
         android:id="@+id/btnAddNota"
         style="@style/circleButton"

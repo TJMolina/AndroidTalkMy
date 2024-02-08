@@ -17,7 +17,7 @@
     </style>
 
     <style name="Theme.API_Splash_Screen" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/primary</item>
+        <item name="windowSplashScreenBackground">@color/splahsColor</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_talkmy</item>
         <item name="postSplashScreenTheme">@style/Base.Theme.TalkMy</item>
     </style>

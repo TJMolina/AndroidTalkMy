@@ -1,6 +1,7 @@
 package com.tjm.talkmy.data.repositoriesImp
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -22,7 +23,9 @@ class PreferencesImp @Inject constructor(private val context: Context) : Prefere
             volume = it[intPreferencesKey(PreferencesType.VOLUME.name)] ?: 10,
             speech = it[floatPreferencesKey(PreferencesType.SPEECH.name)] ?: 1f,
             velocity = it[floatPreferencesKey(PreferencesType.VELOCITY.name)] ?: 1f,
-            voice = it[stringPreferencesKey(PreferencesType.VOICE.name)]?:""
+            voice = it[stringPreferencesKey(PreferencesType.VOICE.name)] ?: "",
+            readNextTask = it[booleanPreferencesKey(PreferencesType.NEXTTASK.name)] ?: false,
+            saveOnline = it[booleanPreferencesKey(PreferencesType.SAVEONLINE.name)] ?: false
         )
     }
 
@@ -54,6 +57,26 @@ class PreferencesImp @Inject constructor(private val context: Context) : Prefere
         runCatching {
             context.dataStore.edit { preferences ->
                 preferences[stringPreferencesKey(PreferencesType.VOICE.name)] = voiceName
+            }
+        }
+            .onSuccess { Logger.d("Success") }
+            .onFailure { Logger.e("failure: $it") }
+    }
+
+    override suspend fun saveReadNextTask(readNexTask: Boolean) {
+        runCatching {
+            context.dataStore.edit { preferences ->
+                preferences[booleanPreferencesKey(PreferencesType.NEXTTASK.name)] = readNexTask
+            }
+        }
+            .onSuccess { Logger.d("Success") }
+            .onFailure { Logger.e("failure: $it") }
+    }
+
+    override suspend fun saveOnlineTask(saveOnline: Boolean) {
+        runCatching {
+            context.dataStore.edit { preferences ->
+                preferences[booleanPreferencesKey(PreferencesType.SAVEONLINE.name)] = saveOnline
             }
         }
             .onSuccess { Logger.d("Success") }

@@ -11,7 +11,6 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.view.MenuHost
@@ -37,7 +36,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private var _binding: FragmentEditTaskBinding? = null
     private val binding get() = _binding!!
 
-    private val editTaskViewModel by viewModels<EditTaskViewModel>()
     private val dialogsViewModel by viewModels<DialogsViewModel>()
     private val configsViewModel by viewModels<ConfigsViewModel>()
 
@@ -55,18 +53,20 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        configsViewModel.getAllPreferences()
         dialogsViewModel.getAllPreferences()
+        reiveTask()
         initUI()
     }
 
     private fun initUI() {
+        initEvents()
         initTTS()
         initMenu()
-        getTask()
-        initEvents()
         initListeners()
         observeTextSize()
         observeTextFromUrl()
+        observeHightlight()
     }
 
     private fun initMenu() {
@@ -118,22 +118,12 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private fun initTTS() {
         tts = TextToSpeech(requireContext(), this)
-        ttsManager = TTSManager(tts, requireActivity())
-    }
-
-    private fun getTask() {
-        val url = arguments?.getString("url")
-        if (!url.isNullOrEmpty()) dialogsViewModel.getTextFromUrl(url)
-        else {
-            configsViewModel.executeFunction(FunctionName.GetTask(arg.taskToEdit, binding.etTask))
-            //editTaskViewModel.getAllTasksTask(arg.taskToEdit, binding.etTask)
-        }
+        ttsManager = TTSManager(tts, binding.rsTalkProgess)
     }
 
     private fun initEvents() {
         requireActivity().onBackPressedDispatcher.addCallback(this) {
-            configsViewModel.executeFunction(FunctionName.SaveTask(binding.etTask))
-            //editTaskViewModel.saveTask(binding.etTask)
+            configsViewModel.executeFunction(FunctionName.SaveTask(binding.etTask.text.toString()))
             isEnabled = false
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
@@ -149,25 +139,44 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
             isEnabled = false
             setOnClickListener { play() }
         }
-        binding.etTask.setOnTouchListener { view, event ->
+        binding.etTask.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 val position = binding.etTask.getOffsetForPosition(event.x, event.y)
-                editTaskViewModel.getPositionClicked(view as EditText, position, ttsManager)
+                ttsManager.findStartByAproxStart(position, binding.etTask)
             }
             false
+        }
+        binding.rsTalkProgess.addOnChangeListener { _, value, _ ->
+            lifecycleScope.launch(Dispatchers.Default) {
+                ttsManager.findStartByIndice(value.toInt())
+            }
         }
     }
 
     private fun play() {
-        ttsManager.togglePlayback(binding.etTask.text.toString(), binding.etTask)
+        ttsManager.togglePlayback(binding.etTask)
+        reajustRangeSliderProgress(ttsManager.sentences.size.toFloat() - 1)
     }
 
-    fun recivedUrl(url: String?) {
+    private fun reajustRangeSliderProgress(toValue: Float) {
+        if (toValue > 0) {
+            binding.rsTalkProgess.valueTo = toValue
+        }
+    }
+
+    fun reiveTask(url: String? = null) {
+        //si recive una rul compartida por otra app
         if (!url.isNullOrEmpty()) {
             lifecycleScope.launch(Dispatchers.IO) {
-                configsViewModel.executeFunction(FunctionName.SaveTask(binding.etTask))
-                //editTaskViewModel.saveTask(binding.etTask)
                 dialogsViewModel.getTextFromUrl(url)
+            }
+        }else{//si recive una url desde el activity
+            val url2 = arguments?.getString("url")
+            if (!url2.isNullOrEmpty()){
+                dialogsViewModel.getTextFromUrl(url2)
+            }//recive un id de la lista de tasks
+            else {
+                configsViewModel.executeFunction(FunctionName.GetTask(arg.taskToEdit, binding.etTask))
             }
         }
     }
@@ -180,7 +189,11 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                         binding.circularProgressBar.visibility = View.VISIBLE
                         binding.etTask.isEnabled = false
                     } else if (value.error.isNotBlank()) {
+                        binding.circularProgressBar.visibility = View.GONE
+                        binding.etTask.isEnabled = true
+                        Toast.makeText(requireContext(), value.error, Toast.LENGTH_SHORT).show()
                     } else if (!dialogsViewModel.textGotFromUrl.isNullOrEmpty()) {
+                        configsViewModel.executeFunction(FunctionName.SaveTask(binding.etTask.text.toString()))
                         binding.circularProgressBar.visibility = View.GONE
                         binding.etTask.setText(dialogsViewModel.textGotFromUrl)
                         binding.etTask.isEnabled = true
@@ -198,6 +211,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                         binding.etTask.isFocusableInTouchMode = false
                         binding.btnPlay.visibility = View.INVISIBLE
                         binding.btnPause.visibility = View.VISIBLE
+                        binding.rsTalkProgess.isEnabled = false
                     }
                 } else if (value.error.isNotBlank()) {
                     Toast.makeText(requireContext(), "Un error a ocurrido.", Toast.LENGTH_SHORT)
@@ -207,6 +221,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                         binding.etTask.isFocusableInTouchMode = true
                         binding.btnPlay.visibility = View.VISIBLE
                         binding.btnPause.visibility = View.INVISIBLE
+                        binding.rsTalkProgess.isEnabled = true
                     }
                 }
                 if (value.finalized && !value.isSpeaking) {
@@ -249,6 +264,18 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         }
     }
 
+    private fun observeHightlight() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            ttsManager.currentSentenceToHighlight.collect {
+                withContext(Dispatchers.Main) {
+                    binding.etTask.apply {
+                        setSelection(it.start, it.start + it.sentence.length)
+                        requestFocus()
+                    }
+                }
+            }
+        }
+    }
 
     override fun onDestroy() {
         ttsManager.destroyTTS()

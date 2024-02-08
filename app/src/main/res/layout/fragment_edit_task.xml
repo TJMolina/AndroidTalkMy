@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.taskEdit.EditTaskFragment">
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/toolBar"
         android:layout_width="match_parent"
@@ -12,53 +13,40 @@
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
+            android:layout_height="wrap_content">
 
             <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/topAppBar"
+                style="@style/header"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:menu="@menu/top_app_bar"
                 app:title="@string/app_title"
                 app:titleTextAppearance="@style/title"
-                android:id="@+id/topAppBar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:menu="@menu/top_app_bar"
-                app:titleTextColor="@color/white"
-                style="@style/header"
-                />
+                app:titleTextColor="@color/white" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <!-- Note: A RecyclerView can also be used -->
-        <androidx.core.widget.NestedScrollView
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clickable="false"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-            <androidx.appcompat.widget.LinearLayoutCompat
+            <EditText
+                android:id="@+id/etTask"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <EditText
-                    android:id="@+id/etTask"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
-                    android:contextClickable="false"
-                    android:gravity="top|start"
-                    android:hint="@string/editTaskHint_ES"
-                    android:inputType="textMultiLine"
-                    android:minHeight="600dp"
-                    android:paddingHorizontal="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="100dp"
-                    android:textColor="@color/text"
-                    android:textSize="22sp"
-                    />
-
-            </androidx.appcompat.widget.LinearLayoutCompat>
-
-        </androidx.core.widget.NestedScrollView>
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:contextClickable="false"
+                android:gravity="top|start"
+                android:hint="@string/editTaskHint_ES"
+                android:inputType="textMultiLine"
+                android:minHeight="600dp"
+                android:paddingHorizontal="8dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="125dp"
+                android:textColor="@color/text" />
+        </ScrollView>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
@@ -70,16 +58,30 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+        <com.google.android.material.slider.Slider
+            android:id="@+id/rsTalkProgess"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:stepSize="1"
+            android:valueFrom="0"
+            app:layout_constraintBottom_toTopOf="@id/btnPlay"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:thumbColor="@color/primary"
+            app:tickColorInactive="@android:color/transparent"
+            app:trackColorActive="@color/primary" />
+
         <Button
             android:id="@+id/btnPause"
             style="@style/circleButton"
             android:layout_width="63dp"
             android:layout_height="70dp"
+            android:layout_marginBottom="8dp"
+            android:paddingLeft="20dp"
+            android:visibility="invisible"
             app:cornerRadius="50dp"
             app:icon="@drawable/ic_pause_grosor_lines"
             app:iconSize="23dp"
-            android:visibility="invisible"
-            android:paddingLeft="20dp"
             app:iconTint="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -90,6 +92,7 @@
             style="@style/circleButton"
             android:layout_width="63dp"
             android:layout_height="70dp"
+            android:layout_marginBottom="8dp"
             android:paddingLeft="9dp"
             android:paddingRight="0dp"
             app:cornerRadius="50dp"
@@ -98,23 +101,21 @@
             app:iconTint="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            />
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/circularProgressBar"
-        tools:visibility="visible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:indeterminate="true"
         android:visibility="gone"
         app:indicatorColor="@color/primary"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,7 +7,7 @@ import com.tjm.talkmy.R
 import com.tjm.talkmy.domain.models.Task
 
 class TaskAdapter(
-    private var taskList: List<Task> = emptyList(),
+    var taskList: MutableList<Task> = mutableListOf(),
     private val editTask: (String)->(Unit),
     private val deleteTask:(String, Int)->(Unit)
 ) : RecyclerView.Adapter<TaskViewHolder>() {
@@ -21,9 +21,5 @@ class TaskAdapter(
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val item = taskList[position]
         holder.render(item, editTask, deleteTask)
-    }
-    fun reloadList(tasks:List<Task>){
-        taskList = tasks
-        notifyDataSetChanged()
     }
 }

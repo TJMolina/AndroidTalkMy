@@ -7,57 +7,65 @@ import android.text.SpannableString
 import android.text.style.BackgroundColorSpan
 import android.util.Log
 import android.widget.EditText
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.MutableLiveData
+import com.google.android.material.slider.Slider
 import com.tjm.talkmy.R
 import com.tjm.talkmy.domain.interfaces.TTSManagerInterface
 import com.tjm.talkmy.domain.models.AllPreferences
-import com.tjm.talkmy.ui.core.extensions.separateSentences
+import com.tjm.talkmy.domain.models.Sentence
 import com.tjm.talkmy.ui.core.states.SpeakingState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-
-class TTSManager(private val tts: TextToSpeech, private val context: FragmentActivity) :
+class TTSManager(
+    private val tts: TextToSpeech,
+    private val rangeSlider: Slider?
+) :
     TTSManagerInterface {
     private var isPlaying = MutableStateFlow(SpeakingState())
+    val sentencesManager = SentencesManager()
     val _isPlaying: StateFlow<SpeakingState> = isPlaying
-    private var playSince = 0
-    private var sentences: List<String> = emptyList()
-    private var currentSentenceIndex = 0
-    override fun togglePlayback(sentences: String?, editText: EditText) {
+    val currentSentenceToHighlight = MutableStateFlow(Sentence("",0))
+    var sentences: List<Sentence> = emptyList()
+    var currentSentenceIndex = 0
+    override fun togglePlayback(editText: EditText) {
         if (isPlaying.value.isSpeaking) {
             pause()
         } else {
-            this.sentences = if (playSince > 0) {
-                sentences?.substring(playSince)?.separateSentences().orEmpty()
-            } else {
-                sentences?.separateSentences().orEmpty()
-            }
-            if (this.sentences.isNotEmpty()) currentSentenceIndex = 0
-            speak(this.sentences, editText)
+            sentences = sentencesManager.getSentences(editText)
+            speak(sentences, editText)
         }
     }
 
-
-    override fun speak(sentences: List<String>, editText: EditText) {
-        if (sentences.isNotEmpty()) {
+    override fun speak(sentences: List<Sentence>, editText: EditText) {
+        if (sentences.isNotEmpty() && currentSentenceIndex < sentences.size) {
             isPlaying.value = SpeakingState(isSpeaking = true)
             val currentSentence = sentences[currentSentenceIndex]
             tts?.apply {
-                speak(currentSentence, TextToSpeech.QUEUE_FLUSH, null, currentSentence)
+                speak(
+                    currentSentence.sentence,
+                    TextToSpeech.QUEUE_FLUSH,
+                    null,
+                    currentSentence.sentence
+                )
                 setOnUtteranceProgressListener(object : UtteranceProgressListener() {
 
                     override fun onStart(utteranceId: String?) {
-                        playSince = editText.text.toString().indexOf(currentSentence, playSince)
-                        highlightSentence(playSince, currentSentence, editText)
-                        playSince += 1
+                        rangeSlider?.value = currentSentenceIndex.toFloat()
+                        currentSentenceToHighlight.value = currentSentence
                     }
 
                     override fun onDone(utteranceId: String?) {
                         if (currentSentenceIndex == sentences.size - 1) {
                             currentSentenceIndex = 0
-                            playSince = 0
                             isPlaying.value = SpeakingState(finalized = true)
                         } else {
                             currentSentenceIndex++
@@ -79,31 +87,23 @@ class TTSManager(private val tts: TextToSpeech, private val context: FragmentAct
         isPlaying.value = SpeakingState(isSpeaking = false)
     }
 
-    override fun playFromClickPosition(start: Int) {
-        if (!isPlaying.value.isSpeaking) {
-            playSince = start
+
+    suspend fun findStartByIndice(indice: Int) {
+        return withContext(Dispatchers.Default) {
+            if (!tts.isSpeaking && !sentences.isNullOrEmpty() && indice < sentences.size) {
+                currentSentenceIndex = indice
+                currentSentenceToHighlight.value = sentences[currentSentenceIndex]
+            }
         }
     }
 
-    // Resaltar la oración actual
-    override fun highlightSentence(start: Int, currentSentence: String, editText: EditText) {
-        val end = start + currentSentence.length
-        val spannableString = SpannableString(editText.text.toString())
-        spannableString.setSpan(
-            BackgroundColorSpan(ContextCompat.getColor(context, R.color.highlit)),
-            start,
-            end,
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-        //resalto el texto
-        context.runOnUiThread {
-            editText.setText(spannableString)
-            //editText.isEnabled = true
-            editText.setSelection(start)
-            editText.requestFocus()
-            //editText.isEnabled = false
+    override fun findStartByAproxStart(start: Int, editText: EditText) {
+        if (!isPlaying.value.isSpeaking) {
+            if (sentences.isNullOrEmpty()) sentences = sentencesManager.getSentences(editText)
+            currentSentenceIndex = sentences.indexOfLast { it.start <= start }
         }
     }
+
 
     override fun destroyTTS() {
         isPlaying.value = SpeakingState(false)

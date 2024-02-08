@@ -53,11 +53,6 @@ class DialogsViewModel @Inject constructor(
     val getTextFromUrlProcces: StateFlow<LoadingErrorState> = _getTextFromUrlProcces
     var textGotFromUrl: String? = null
 
-
-    init {
-        getAllPreferences()
-    }
-
     fun createDialogs() {
         createTextDialog()
         configUrlDialog()

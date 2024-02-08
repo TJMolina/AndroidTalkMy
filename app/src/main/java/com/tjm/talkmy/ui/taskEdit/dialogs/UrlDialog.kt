@@ -5,26 +5,17 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
-import com.orhanobut.logger.Logger
 import com.tjm.talkmy.databinding.DialogInsertUrlBinding
-import com.tjm.talkmy.databinding.DialogTalkoptionsBinding
 import com.tjm.talkmy.ui.core.extensions.isURL
-import com.tjm.talkmy.ui.taskEdit.DialogsViewModel
-import com.tjm.talkmy.ui.taskEdit.managers.MyAudioManager
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class UrlDialog : DialogFragment() {
     private var _binding: DialogInsertUrlBinding? = null
     val binding get() = _binding!!
-    interface addFunctions{
-        fun searchUrl(url:String)
+
+    interface addFunctions {
+        fun searchUrl(url: String)
     }
 
     lateinit var functions: addFunctions
@@ -42,15 +33,17 @@ class UrlDialog : DialogFragment() {
     }
 
     fun initListeners() {
-        binding.btnCloceDialog.setOnClickListener{
+        binding.btnCloceDialog.setOnClickListener {
             dismiss()
         }
         binding.btnGetTextFromUrl.setOnClickListener {
             val url = binding.edUrl.text.toString()
-            binding.edUrl.setTextColor(if (url.isURL()) Color.BLACK else Color.RED)
-            if (url.isNotBlank() && url.isURL()) {
-                functions.searchUrl(url)
-                dismiss()
+            if (url.isNotBlank()) {
+                if (url.isURL()) {
+                    functions.searchUrl(url)
+                    dismiss()
+                }
+                binding.edUrl.setTextColor(Color.RED)
             }
         }
     }

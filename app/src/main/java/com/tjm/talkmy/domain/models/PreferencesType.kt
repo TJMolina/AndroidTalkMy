@@ -5,5 +5,7 @@ enum class PreferencesType {
     SPEECH,
     VELOCITY,
     TEXTSIZE,
-    VOICE
+    VOICE,
+    NEXTTASK,
+    SAVEONLINE
 }

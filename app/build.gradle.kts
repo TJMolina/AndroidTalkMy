@@ -55,6 +55,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.preference:preference:1.2.0")
 
     val navVersion = "2.7.6"
     val retrofitVersion = "2.9.0"
@@ -80,6 +81,7 @@ dependencies {
 
     //Logger
     implementation("com.orhanobut:logger:2.2.0")
+
     //Room
     implementation("androidx.room:room-ktx:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")

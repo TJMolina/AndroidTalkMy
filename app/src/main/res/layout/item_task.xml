@@ -11,22 +11,21 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="120dp">
-
+        android:layout_height="120dp"
+        >
         <Button
             android:id="@+id/tvTask"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:textAllCaps="false"
+            android:textSize="15sp"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="match_parent"
             android:ellipsize="end"
             android:gravity="start|top"
             android:textColor="@color/text"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/guideButtonsTask"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Texto de prueba" />
+            tools:text="Texto de prueba\ns\ns\ns\ns\ns\ns\nt" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideButtonsTask"

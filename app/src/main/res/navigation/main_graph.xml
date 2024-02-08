@@ -13,6 +13,11 @@
         <action
             android:id="@+id/action_tasksListFragment_to_editTaskFragment"
             app:destination="@id/editTaskFragment"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+        <action
+            android:id="@+id/action_tasksListFragment_to_optionsFragment"
+            app:destination="@id/optionsFragment"
             app:enterAnim="@android:anim/slide_in_left"
             app:exitAnim="@android:anim/slide_out_right"
             app:popEnterAnim="@android:anim/slide_in_left"
@@ -28,4 +33,9 @@
             app:argType="string"
             app:nullable="true" />
     </fragment>
+    <fragment
+        android:id="@+id/optionsFragment"
+        android:name="com.tjm.talkmy.ui.configs.OptionsFragment"
+        android:label="fragment_options"
+        tools:layout="@layout/fragment_options" />
 </navigation>

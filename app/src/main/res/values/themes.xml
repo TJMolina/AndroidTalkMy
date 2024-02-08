@@ -23,14 +23,12 @@
 
 
     <style name="Theme.API_Splash_Screen" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/primary</item>
+        <item name="windowSplashScreenBackground">@color/splahsColor</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_talkmy</item>
         <item name="postSplashScreenTheme">@style/Base.Theme.TalkMy</item>
     </style>
 
     <style name="title">
-        <item name="android:textSize">30dp</item>
+        <item name="android:textSize">30sp</item>
     </style>
-
-
 </resources>

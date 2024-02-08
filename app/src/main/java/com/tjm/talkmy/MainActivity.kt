@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
             val argument = it.getStringExtra(Intent.EXTRA_TEXT)
             val fragment = supportFragmentManager.findFragmentByTag("EditTaskFragment")
             if (fragment != null && fragment is EditTaskFragment) {
-                fragment.recivedUrl(argument!!)
+                fragment.reiveTask(argument!!)
             }
             else{
                 initSharedListener(argument)

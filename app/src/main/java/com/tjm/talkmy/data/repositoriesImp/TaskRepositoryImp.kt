@@ -2,22 +2,18 @@ package com.tjm.talkmy.data.repositoriesImp
 
 import android.util.Log
 import com.tjm.talkmy.data.database.dao.TasksDao
-import com.tjm.talkmy.data.database.entities.TaskEntitiy
 import com.tjm.talkmy.data.database.entities.toDatabase
 import com.tjm.talkmy.domain.models.Task
 import com.tjm.talkmy.domain.repositories.TasksRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class TaskRepositoryImp @Inject constructor(private val tasksDao: TasksDao) : TasksRepository {
-    override suspend fun getTasksFromLocal(): List<Task>? {
-        runCatching {
-            tasksDao.getAllTasks()
+    override suspend fun getTasksFromLocal(): Flow<List<Task>> {
+        return tasksDao.getAllTasks().map { item ->
+            item.map { task -> task.toDomain() }
         }
-            .onSuccess {
-                return it.map { task -> task.toDomain() }
-            }
-            .onFailure { Log.e("getTasksFromLocal", it.toString()) }
-        return null
     }
 
     override suspend fun uploadTaskLocal(task: Task): String? {
@@ -39,7 +35,7 @@ class TaskRepositoryImp @Inject constructor(private val tasksDao: TasksDao) : Ta
         runCatching {
             tasksDao.getTask(id)
         }
-            .onSuccess { return it.toDomain()}
+            .onSuccess { return it.toDomain() }
             .onFailure { Log.e("uploadTaskLocal", it.toString()) }
         return null
     }
@@ -48,7 +44,7 @@ class TaskRepositoryImp @Inject constructor(private val tasksDao: TasksDao) : Ta
         runCatching {
             tasksDao.deleteTask(id)
         }
-            .onSuccess { Log.i("TaskRepositoryImp deleteTask", "succefull")}
+            .onSuccess { Log.i("TaskRepositoryImp deleteTask", "succefull") }
             .onFailure { Log.e("TaskRepositoryImp deleteTask", it.toString()) }
     }
 

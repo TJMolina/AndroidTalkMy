@@ -8,6 +8,9 @@ interface Preferences {
     suspend fun getPreferences(): Flow<AllPreferences>
     suspend fun saveTalkPreferences(volume: Int, speech: Float, velocity: Float)
     suspend fun saveTextSize(size:Float)
-
     suspend fun saveVoicePreference(voiceName:String)
+
+    suspend fun saveReadNextTask(readNexTask:Boolean)
+    suspend fun saveOnlineTask(saveOnline:Boolean)
+
 }
