@@ -15,7 +15,9 @@
     <style name="header">
         <item name="android:background">@color/primary</item>
     </style>
-
+    <style name="labelColor" parent="Widget.MaterialComponents.Tooltip">
+        <item name="backgroundTint">@color/primary</item>
+    </style>
     <style name="Theme.API_Splash_Screen" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/splahsColor</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_talkmy</item>

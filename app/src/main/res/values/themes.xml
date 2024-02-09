@@ -16,11 +16,14 @@
         <item name="android:backgroundTint">@color/primary</item>
     </style>
 
+    <style name="labelColor" parent="Widget.MaterialComponents.Tooltip">
+        <item name="backgroundTint">@color/primary</item>
+    </style>
+
 
     <style name="header" parent="Widget.MaterialComponents.Toolbar.Primary">
         <item name="android:background">@color/primary</item>
     </style>
-
 
     <style name="Theme.API_Splash_Screen" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/splahsColor</item>
@@ -29,6 +32,5 @@
     </style>
 
     <style name="title">
-        <item name="android:textSize">30sp</item>
     </style>
 </resources>

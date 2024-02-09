@@ -42,6 +42,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private lateinit var tts: TextToSpeech
     private lateinit var ttsManager: TTSManager
 
+
     private val arg: EditTaskFragmentArgs by navArgs()
 
     override fun onCreateView(
@@ -53,7 +54,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         _binding = FragmentEditTaskBinding.inflate(inflater, container, false)
         return binding.root
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         reiveTask()
         initUI()
@@ -108,7 +108,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                         )
                         true
                     }
-
                     else -> false
                 }
             }
@@ -119,6 +118,8 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private fun initTTS() {
         tts = TextToSpeech(requireContext(), this)
         ttsManager = TTSManager(tts, binding.rsTalkProgess)
+        ttsManager.reloadSentences(binding.etTask.text.toString())
+        reajustRangeSliderProgress(ttsManager.sentences.size.toFloat())
     }
 
     private fun initEvents() {

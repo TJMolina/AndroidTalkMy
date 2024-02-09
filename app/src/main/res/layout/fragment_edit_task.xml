@@ -70,8 +70,10 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:thumbColor="@color/primary"
+            app:trackColorActive="@color/primary"
             app:tickColorInactive="@android:color/transparent"
-            app:trackColorActive="@color/primary" />
+            app:labelStyle="@style/labelColor"
+            />
 
         <Button
             android:id="@+id/btnPause"

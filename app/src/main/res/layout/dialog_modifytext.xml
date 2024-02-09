@@ -45,6 +45,7 @@
                     app:thumbColor="@color/primary"
                     app:tickColorInactive="@color/primary"
                     app:trackColorActive="@color/primary"
+                    app:labelStyle="@style/labelColor"
                     />
 
                 <TextView

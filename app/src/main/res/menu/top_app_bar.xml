@@ -22,11 +22,6 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/importFile"
-        android:title="pdf/txt"
-        android:contentDescription="Importar un archivo pdf o txt."
-        app:showAsAction="never" />
-    <item
         android:id="@+id/optionsTexto"
         android:title="Texto"
         android:contentDescription="Opciones de texto"

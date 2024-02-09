@@ -1,10 +1,8 @@
 package com.tjm.talkmy.ui.taskEdit
 
-import android.text.SpannableStringBuilder
 import android.widget.EditText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.orhanobut.logger.Logger
 import com.tjm.talkmy.data.source.preferences.Preferences
 import com.tjm.talkmy.domain.models.AllPreferences
 import com.tjm.talkmy.domain.models.FunctionName
@@ -129,4 +127,6 @@ class ConfigsViewModel @Inject constructor(
             uploadTaskUseCasea(auxtask)
         }
     }
+
+
 }

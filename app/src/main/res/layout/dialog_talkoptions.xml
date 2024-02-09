@@ -58,7 +58,9 @@
                 android:valueTo="15"
                 app:thumbColor="@color/primary"
                 app:tickColorInactive="@color/primary"
-                app:trackColorActive="@color/primary" />
+                app:trackColorActive="@color/primary"
+                app:labelStyle="@style/labelColor"
+                />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -77,7 +79,9 @@
                 android:valueTo="2.0"
                 app:thumbColor="@color/primary"
                 app:tickColorInactive="@color/primary"
-                app:trackColorActive="@color/primary" />
+                app:trackColorActive="@color/primary"
+                app:labelStyle="@style/labelColor"
+                />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -95,7 +99,9 @@
                 android:valueTo="2.0"
                 app:thumbColor="@color/primary"
                 app:tickColorInactive="@color/primary"
-                app:trackColorActive="@color/primary" />
+                app:trackColorActive="@color/primary"
+                app:labelStyle="@style/labelColor"
+                />
         </androidx.appcompat.widget.LinearLayoutCompat>
 
         <androidx.appcompat.widget.LinearLayoutCompat
