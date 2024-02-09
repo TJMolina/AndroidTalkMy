@@ -7,14 +7,14 @@ import com.tjm.talkmy.domain.models.Sentence
 interface TTSManagerInterface {
     //fun togglePlayback(sentences: List<String>?, editText: EditText)
 
-    fun togglePlayback(editText: EditText)
+    fun togglePlayback(dirtySentences: String)
 
 
-    fun speak(sentences: List<Sentence>, editText: EditText)
+    fun speak()
 
     fun pause()
 
     fun destroyTTS()
-    fun findStartByAproxStart(start: Int, editText: EditText)
+    fun findStartByAproxStart(start: Int, dirtySentences: String)
     fun configTTS(preferences: AllPreferences)
 }

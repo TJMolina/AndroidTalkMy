@@ -4,6 +4,7 @@ import android.text.SpannableStringBuilder
 import android.widget.EditText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.orhanobut.logger.Logger
 import com.tjm.talkmy.data.source.preferences.Preferences
 import com.tjm.talkmy.domain.models.AllPreferences
 import com.tjm.talkmy.domain.models.FunctionName
@@ -16,6 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -55,7 +57,7 @@ class ConfigsViewModel @Inject constructor(
                         }
 
                         is FunctionName.SaveTask -> {
-                            saveTask(function.text)
+                            saveTask(function.text, function.id, function.fecha)
                             if (preferences.value.saveOnline) {
                                 //TODO aqui subiria la nota a la bd
                             }
@@ -66,38 +68,9 @@ class ConfigsViewModel @Inject constructor(
                                 readNextsTaskFunction(function.editText, function.play)
                             }
                         }
-                    }
-                }
-            }
-        }
-    }
 
-    private fun readNextsTaskFunction(editText: EditText, play: () -> Unit) {
-        if (allTasks.size - 1 > currentTask) {
-            if (editText.text.toString() != taskBeingEditing.nota) {
-                executeFunction(FunctionName.SaveTask(editText.text.toString()))
-            }
-            currentTask++
-            taskBeingEditing = allTasks[currentTask]
-            editText.setText(taskBeingEditing.nota)
-            play()
-        }
-    }
-
-    fun getAllTasks(id: String?, edText: EditText) {
-        if (!id.isNullOrEmpty()) {
-            viewModelScope.launch(Dispatchers.Default) {
-                getTasksUseCase().collect {
-                    if (!it.isNullOrEmpty()) {
-                        allTasks = it.reversed().toMutableList()
-                        val indice =
-                            if (allTasks.size <= 1) 0 else allTasks.indexOfFirst { task -> task.id == id }
-                        currentTask = indice
-                        taskBeingEditing = allTasks[indice]
-                        val builder = SpannableStringBuilder()
-                        builder.append(taskBeingEditing.nota)
-                        edText.post {
-                            edText.text = builder
+                        is FunctionName.ClickParagraph -> {
+                            if (preferences.value.clickParagraph) function.function()
                         }
                     }
                 }
@@ -105,24 +78,52 @@ class ConfigsViewModel @Inject constructor(
         }
     }
 
+    private fun readNextsTaskFunction(editText: EditText, play: () -> Unit) {
+        if (currentTask < allTasks.size - 1) {
+            val nota = editText.text.toString()
+            if (nota != allTasks[currentTask].nota) {
+                val id = taskBeingEditing.id
+                val fecha = taskBeingEditing.fecha
+                executeFunction(FunctionName.SaveTask(nota, id, fecha))
+                allTasks[currentTask].nota = nota
+            }
+            currentTask++
+            taskBeingEditing = allTasks[currentTask]
 
-    fun getTask(id: String?, edText: EditText) {
+            editText.setText(taskBeingEditing.nota)
+            play()
+        }
+    }
+
+    private fun getAllTasks(id: String?, edText: EditText) {
         if (!id.isNullOrEmpty()) {
             viewModelScope.launch(Dispatchers.IO) {
-                getTaskUseCase(id)?.let {
-                    taskBeingEditing = it
-                    withContext(Dispatchers.Main) { edText.setText(taskBeingEditing.nota) }
+                val tasks = getTasksUseCase().first()
+                if (tasks.isNotEmpty()) {
+                    allTasks = tasks.reversed().toMutableList()
+                    currentTask = allTasks.indexOfFirst { task -> task.id == id }
+                    taskBeingEditing = allTasks[currentTask]
                 }
             }
         }
     }
 
-    fun saveTask(text: String) {
+    private fun getTask(id: String?, edText: EditText) {
+        if (!id.isNullOrEmpty()) {
+            viewModelScope.launch(Dispatchers.IO) {
+                getTaskUseCase(id)?.let {
+                    taskBeingEditing = it
+                }
+            }
+        }
+    }
+
+    private fun saveTask(text: String, id: String? = null, fecha: String? = null) {
         if (text.isEmpty()) return
         val auxtask = Task(
-            id = taskBeingEditing.id,
+            id = id ?: taskBeingEditing.id,
             nota = text,
-            fecha = taskBeingEditing.fecha
+            fecha = fecha ?: taskBeingEditing.fecha
         )
         CoroutineScope(Dispatchers.IO).launch {
             uploadTaskUseCasea(auxtask)

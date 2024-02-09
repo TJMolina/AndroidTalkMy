@@ -48,23 +48,23 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        configsViewModel.getAllPreferences()
+        dialogsViewModel.getAllPreferences()
         _binding = FragmentEditTaskBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        configsViewModel.getAllPreferences()
-        dialogsViewModel.getAllPreferences()
         reiveTask()
         initUI()
     }
 
     private fun initUI() {
+        observeTextSize()
         initEvents()
         initTTS()
         initMenu()
         initListeners()
-        observeTextSize()
         observeTextFromUrl()
         observeHightlight()
     }
@@ -139,14 +139,16 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
             isEnabled = false
             setOnClickListener { play() }
         }
-        binding.etTask.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_DOWN) {
-                val position = binding.etTask.getOffsetForPosition(event.x, event.y)
-                ttsManager.findStartByAproxStart(position, binding.etTask)
+        configsViewModel.executeFunction(FunctionName.ClickParagraph() {
+            binding.etTask.setOnTouchListener { _, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    val position = binding.etTask.getOffsetForPosition(event.x, event.y)
+                    ttsManager.findStartByAproxStart(position, binding.etTask.text.toString())
+                }
+                false
             }
-            false
-        }
-        binding.rsTalkProgess.addOnChangeListener { _, value, _ ->
+        })
+        binding.rsTalkProgess.addOnChangeListener { slider, value, _ ->
             lifecycleScope.launch(Dispatchers.Default) {
                 ttsManager.findStartByIndice(value.toInt())
             }
@@ -154,7 +156,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     private fun play() {
-        ttsManager.togglePlayback(binding.etTask)
+        ttsManager.togglePlayback(binding.etTask.text.toString())
         reajustRangeSliderProgress(ttsManager.sentences.size.toFloat() - 1)
     }
 
@@ -165,18 +167,22 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     fun reiveTask(url: String? = null) {
-        //si recive una rul compartida por otra app
-        if (!url.isNullOrEmpty()) {
+        if (!arg.taskToEdit.isNullOrEmpty()) {
+            binding.etTask.append(arg.task)
             lifecycleScope.launch(Dispatchers.IO) {
-                dialogsViewModel.getTextFromUrl(url)
+                configsViewModel.executeFunction(
+                    FunctionName.GetTask(
+                        arg.taskToEdit,
+                        binding.etTask
+                    )
+                )
             }
-        }else{//si recive una url desde el activity
-            val url2 = arguments?.getString("url")
-            if (!url2.isNullOrEmpty()){
-                dialogsViewModel.getTextFromUrl(url2)
-            }//recive un id de la lista de tasks
-            else {
-                configsViewModel.executeFunction(FunctionName.GetTask(arg.taskToEdit, binding.etTask))
+        } else {
+            val urlAux = url ?: arguments?.getString("url")
+            if (!urlAux.isNullOrEmpty()) {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    dialogsViewModel.getTextFromUrl(urlAux)
+                }
             }
         }
     }

@@ -13,6 +13,8 @@
         <action
             android:id="@+id/action_tasksListFragment_to_editTaskFragment"
             app:destination="@id/editTaskFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
             app:popEnterAnim="@android:anim/slide_in_left"
             app:popExitAnim="@android:anim/slide_out_right" />
         <action
@@ -30,6 +32,10 @@
         tools:layout="@layout/fragment_edit_task" >
         <argument
             android:name="taskToEdit"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="task"
             app:argType="string"
             app:nullable="true" />
     </fragment>

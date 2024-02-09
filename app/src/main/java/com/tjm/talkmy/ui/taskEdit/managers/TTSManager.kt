@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.MutableLiveData
 import com.google.android.material.slider.Slider
+import com.orhanobut.logger.Logger
 import com.tjm.talkmy.R
 import com.tjm.talkmy.domain.interfaces.TTSManagerInterface
 import com.tjm.talkmy.domain.models.AllPreferences
@@ -36,16 +37,20 @@ class TTSManager(
     val currentSentenceToHighlight = MutableStateFlow(Sentence("",0))
     var sentences: List<Sentence> = emptyList()
     var currentSentenceIndex = 0
-    override fun togglePlayback(editText: EditText) {
-        if (isPlaying.value.isSpeaking) {
+    override fun togglePlayback(dirtySentences:String) {
+        if (tts.isSpeaking) {
             pause()
         } else {
-            sentences = sentencesManager.getSentences(editText)
-            speak(sentences, editText)
+            reloadSentences(dirtySentences)
+            if(currentSentenceIndex > sentences.size - 1) currentSentenceIndex = sentences.size - 1
+            speak()
         }
     }
+    fun reloadSentences(dirtySentences: String){
+            sentences = sentencesManager.getSentences(dirtySentences)
+    }
 
-    override fun speak(sentences: List<Sentence>, editText: EditText) {
+    override fun speak() {
         if (sentences.isNotEmpty() && currentSentenceIndex < sentences.size) {
             isPlaying.value = SpeakingState(isSpeaking = true)
             val currentSentence = sentences[currentSentenceIndex]
@@ -57,19 +62,17 @@ class TTSManager(
                     currentSentence.sentence
                 )
                 setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-
                     override fun onStart(utteranceId: String?) {
                         rangeSlider?.value = currentSentenceIndex.toFloat()
                         currentSentenceToHighlight.value = currentSentence
                     }
-
                     override fun onDone(utteranceId: String?) {
                         if (currentSentenceIndex == sentences.size - 1) {
                             currentSentenceIndex = 0
                             isPlaying.value = SpeakingState(finalized = true)
                         } else {
                             currentSentenceIndex++
-                            speak(sentences, editText)
+                            speak()
                         }
                     }
 
@@ -97,10 +100,11 @@ class TTSManager(
         }
     }
 
-    override fun findStartByAproxStart(start: Int, editText: EditText) {
+    override fun findStartByAproxStart(start: Int, dirtySentences: String) {
         if (!isPlaying.value.isSpeaking) {
-            if (sentences.isNullOrEmpty()) sentences = sentencesManager.getSentences(editText)
+            if (sentences.isNullOrEmpty()) reloadSentences(dirtySentences)
             currentSentenceIndex = sentences.indexOfLast { it.start <= start }
+            if(currentSentenceIndex < 0) currentSentenceIndex = 0
         }
     }
 

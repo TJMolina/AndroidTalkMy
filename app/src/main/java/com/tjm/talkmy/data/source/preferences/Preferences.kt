@@ -1,6 +1,7 @@
 package com.tjm.talkmy.data.source.preferences
 
 import com.tjm.talkmy.domain.models.AllPreferences
+import com.tjm.talkmy.domain.models.PreferencesType
 import kotlinx.coroutines.flow.Flow
 
 
@@ -10,7 +11,6 @@ interface Preferences {
     suspend fun saveTextSize(size:Float)
     suspend fun saveVoicePreference(voiceName:String)
 
-    suspend fun saveReadNextTask(readNexTask:Boolean)
-    suspend fun saveOnlineTask(saveOnline:Boolean)
+    suspend fun saveBooleanPreference(preference:Boolean, name:PreferencesType)
 
 }

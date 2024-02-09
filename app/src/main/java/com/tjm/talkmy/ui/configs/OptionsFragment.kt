@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.tjm.talkmy.databinding.FragmentOptionsBinding
+import com.tjm.talkmy.domain.models.PreferencesType
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -45,6 +46,7 @@ class OptionsFragment : Fragment() {
                 withContext(Dispatchers.Main) {
                     binding.switchSaveOnline.isChecked = value.saveOnline
                     binding.switchReadNextTask.isChecked = value.readNextTask
+                    binding.switchReadParagraph.isChecked = value.clickParagraph
                 }
             }
         }
@@ -52,11 +54,14 @@ class OptionsFragment : Fragment() {
 
     private fun initListeners() {
         binding.switchReadNextTask.setOnClickListener {
-            optionsViewModel.saveReadNextTaskOption(binding.switchReadNextTask.isChecked)
+            optionsViewModel.savePreference(binding.switchReadNextTask.isChecked, PreferencesType.NEXTTASK)
 
         }
         binding.switchSaveOnline.setOnClickListener {
-            optionsViewModel.saveTaskOnlineOption(binding.switchSaveOnline.isChecked)
+            optionsViewModel.savePreference(binding.switchSaveOnline.isChecked, PreferencesType.SAVEONLINE)
+        }
+        binding.switchReadParagraph.setOnClickListener {
+            optionsViewModel.savePreference(binding.switchReadParagraph.isChecked, PreferencesType.CLICKPARAGRAPH)
         }
     }
 

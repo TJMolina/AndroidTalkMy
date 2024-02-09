@@ -44,7 +44,6 @@ class DialogsViewModel @Inject constructor(
 ) :
     ViewModel() {
     var preferences = MutableStateFlow(AllPreferences())
-
     val textSizeDialog = TextOptionsDialog()
     val talkDialog = TalkOptionsDialog()
     val voicesDialog = VoicesSelectDialog()
@@ -61,35 +60,10 @@ class DialogsViewModel @Inject constructor(
     fun getAllPreferences() {
         viewModelScope.launch(Dispatchers.IO) {
             preferencesRepository.getPreferences().collectLatest {
-                preferences.value = AllPreferences(
-                    speech = it.speech,
-                    textSize = it.textSize,
-                    velocity = it.velocity,
-                    volume = it.volume,
-                    voice = it.voice
-                )
+                preferences.value = it
             }
         }
     }
-
-     fun createSelectVoicesDialog(tts: TextToSpeech, context: Context) {
-        voicesDialog.setListener(object : VoicesSelectDialog.ConfigSelectVoiceDialog {
-
-            override fun applyAllVoices(spiner: Spinner) {
-                val voiceNames = mutableListOf<String>()
-                val voices = tts.voices
-                for (voice in voices) {
-                    voiceNames.add(voice.name)
-                }
-                val adapter =
-                    ArrayAdapter(context, android.R.layout.simple_spinner_item, voiceNames)
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                spiner.adapter = adapter
-            }
-
-        })
-    }
-
     fun createTextDialog() {
         textSizeDialog.setListener(object : TextOptionsDialog.ConfigTextOptionsDialog {
             override fun onApplyButtonClick(textSize: Float) {
@@ -102,6 +76,23 @@ class DialogsViewModel @Inject constructor(
                 rangeSlider.value = preferences.value.textSize
                 textView.textSize = preferences.value.textSize
             }
+        })
+    }
+
+     fun createSelectVoicesDialog(tts: TextToSpeech, context: Context) {
+        voicesDialog.setListener(object : VoicesSelectDialog.ConfigSelectVoiceDialog {
+            override fun applyAllVoices(spiner: Spinner) {
+                val voiceNames = mutableListOf<String>()
+                val voices = tts.voices
+                for (voice in voices) {
+                    voiceNames.add(voice.name)
+                }
+                val adapter =
+                    ArrayAdapter(context, android.R.layout.simple_spinner_item, voiceNames)
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                spiner.adapter = adapter
+            }
+
         })
     }
 

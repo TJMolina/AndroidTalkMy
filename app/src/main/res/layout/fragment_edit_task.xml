@@ -56,7 +56,9 @@
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        android:background="@drawable/background_difuminado"
+        >
 
         <com.google.android.material.slider.Slider
             android:id="@+id/rsTalkProgess"

@@ -7,5 +7,6 @@ data class AllPreferences(
     val velocity: Float = 1f,
     val voice:String = "",
     val readNextTask:Boolean = false,
-    val saveOnline:Boolean = false
+    val saveOnline:Boolean = false,
+    val clickParagraph:Boolean = true
 )

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.orhanobut.logger.Logger
 import com.tjm.talkmy.data.source.preferences.Preferences
 import com.tjm.talkmy.domain.models.AllPreferences
+import com.tjm.talkmy.domain.models.PreferencesType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,10 +18,6 @@ class OptionsViewModel @Inject constructor(private val preferencesRepository: Pr
     ViewModel() {
     var preferences = MutableStateFlow(AllPreferences())
 
-    init {
-        getAllPreferences()
-    }
-
     fun getAllPreferences() {
         viewModelScope.launch(Dispatchers.IO) {
             preferencesRepository.getPreferences().collectLatest {
@@ -28,14 +25,9 @@ class OptionsViewModel @Inject constructor(private val preferencesRepository: Pr
             }
         }
     }
-    fun saveReadNextTaskOption(save:Boolean){
+    fun savePreference(preference:Boolean, name:PreferencesType){
         viewModelScope.launch(Dispatchers.IO) {
-            preferencesRepository.saveReadNextTask(save)
-        }
-    }
-    fun saveTaskOnlineOption(save:Boolean){
-        viewModelScope.launch(Dispatchers.IO) {
-            preferencesRepository.saveOnlineTask(save)
+            preferencesRepository.saveBooleanPreference(preference, name)
         }
     }
 }

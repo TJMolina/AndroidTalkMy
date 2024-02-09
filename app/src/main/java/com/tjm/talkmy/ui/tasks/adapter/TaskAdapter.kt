@@ -8,7 +8,7 @@ import com.tjm.talkmy.domain.models.Task
 
 class TaskAdapter(
     var taskList: MutableList<Task> = mutableListOf(),
-    private val editTask: (String)->(Unit),
+    private val editTask: (String, String)->(Unit),
     private val deleteTask:(String, Int)->(Unit)
 ) : RecyclerView.Adapter<TaskViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {

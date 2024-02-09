@@ -8,8 +8,8 @@ import com.tjm.talkmy.ui.core.extensions.separateSentences
 import javax.inject.Inject
 
  class SentencesManager @Inject constructor() {
-     fun getSentences(editText: EditText):List<Sentence> {
-         val Alltext = editText.text.toString()
+     fun getSentences(dirtySentences:String):List<Sentence> {
+         val Alltext = dirtySentences
          val auxSentences = Alltext.separateSentences()
          var start = 0
          return auxSentences.map {

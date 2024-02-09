@@ -7,5 +7,6 @@ enum class PreferencesType {
     TEXTSIZE,
     VOICE,
     NEXTTASK,
-    SAVEONLINE
+    SAVEONLINE,
+    CLICKPARAGRAPH
 }

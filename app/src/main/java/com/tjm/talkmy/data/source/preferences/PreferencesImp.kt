@@ -25,7 +25,8 @@ class PreferencesImp @Inject constructor(private val context: Context) : Prefere
             velocity = it[floatPreferencesKey(PreferencesType.VELOCITY.name)] ?: 1f,
             voice = it[stringPreferencesKey(PreferencesType.VOICE.name)] ?: "",
             readNextTask = it[booleanPreferencesKey(PreferencesType.NEXTTASK.name)] ?: false,
-            saveOnline = it[booleanPreferencesKey(PreferencesType.SAVEONLINE.name)] ?: false
+            saveOnline = it[booleanPreferencesKey(PreferencesType.SAVEONLINE.name)] ?: false,
+            clickParagraph = it[booleanPreferencesKey(PreferencesType.CLICKPARAGRAPH.name)]?: false
         )
     }
 
@@ -63,20 +64,11 @@ class PreferencesImp @Inject constructor(private val context: Context) : Prefere
             .onFailure { Logger.e("failure: $it") }
     }
 
-    override suspend fun saveReadNextTask(readNexTask: Boolean) {
-        runCatching {
-            context.dataStore.edit { preferences ->
-                preferences[booleanPreferencesKey(PreferencesType.NEXTTASK.name)] = readNexTask
-            }
-        }
-            .onSuccess { Logger.d("Success") }
-            .onFailure { Logger.e("failure: $it") }
-    }
 
-    override suspend fun saveOnlineTask(saveOnline: Boolean) {
+    override suspend fun saveBooleanPreference(preference:Boolean, name:PreferencesType){
         runCatching {
             context.dataStore.edit { preferences ->
-                preferences[booleanPreferencesKey(PreferencesType.SAVEONLINE.name)] = saveOnline
+                preferences[booleanPreferencesKey(name.name)] = preference
             }
         }
             .onSuccess { Logger.d("Success") }

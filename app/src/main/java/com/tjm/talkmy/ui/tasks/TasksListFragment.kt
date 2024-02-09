@@ -71,7 +71,7 @@ class TasksListFragment : Fragment() {
     private fun initListeners() {
         binding.btnAddNota.setOnClickListener {
             findNavController().navigate(
-                TasksListFragmentDirections.actionTasksListFragmentToEditTaskFragment(null)
+                TasksListFragmentDirections.actionTasksListFragmentToEditTaskFragment(null,null)
             )
         }
     }
@@ -79,7 +79,7 @@ class TasksListFragment : Fragment() {
     private fun initRecyclerView() {
         val manager = LinearLayoutManager(requireContext())
         taskAdapter = TaskAdapter(
-            editTask = { id -> editTask(id) },
+            editTask = { id, task -> editTask(id, task) },
             deleteTask = { id, position ->
                 tasksListViewModel.deleteTask(
                     id,
@@ -92,9 +92,9 @@ class TasksListFragment : Fragment() {
         tasksListViewModel.getLocalTasks(taskAdapter)
     }
 
-    private fun editTask(id: String) {
+    private fun editTask(id: String, task:String) {
         findNavController().navigate(
-            TasksListFragmentDirections.actionTasksListFragmentToEditTaskFragment(id)
+            TasksListFragmentDirections.actionTasksListFragmentToEditTaskFragment(id, task)
         )
     }
 }
