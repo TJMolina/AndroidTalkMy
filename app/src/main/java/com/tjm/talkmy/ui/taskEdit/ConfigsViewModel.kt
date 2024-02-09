@@ -48,12 +48,8 @@ class ConfigsViewModel @Inject constructor(
                 withContext(Dispatchers.Main) {
                     when (function) {
                         is FunctionName.GetTask -> {
-                            if (preferences.value.readNextTask) getAllTasks(
-                                function.id,
-                                function.editText
-                            ) else getTask(function.id, function.editText)
+                            if (preferences.value.readNextTask) getAllTasks(function.id) else getTask(function.id)
                         }
-
                         is FunctionName.SaveTask -> {
                             saveTask(function.text, function.id, function.fecha)
                             if (preferences.value.saveOnline) {
@@ -93,7 +89,7 @@ class ConfigsViewModel @Inject constructor(
         }
     }
 
-    private fun getAllTasks(id: String?, edText: EditText) {
+    private fun getAllTasks(id: String?) {
         if (!id.isNullOrEmpty()) {
             viewModelScope.launch(Dispatchers.IO) {
                 val tasks = getTasksUseCase().first()
@@ -106,7 +102,7 @@ class ConfigsViewModel @Inject constructor(
         }
     }
 
-    private fun getTask(id: String?, edText: EditText) {
+    private fun getTask(id: String?) {
         if (!id.isNullOrEmpty()) {
             viewModelScope.launch(Dispatchers.IO) {
                 getTaskUseCase(id)?.let {

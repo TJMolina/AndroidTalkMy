@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.MenuProvider
@@ -20,18 +19,6 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private val multiplePermissionsNameList = if (Build.VERSION.SDK_INT >= 33) {
-        arrayListOf(
-            android.Manifest.permission.READ_MEDIA_AUDIO,
-            android.Manifest.permission.READ_MEDIA_VIDEO,
-            android.Manifest.permission.READ_MEDIA_IMAGES
-        )
-    } else {
-        arrayListOf(
-            android.Manifest.permission.READ_EXTERNAL_STORAGE
-        )
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         val screenSplash = installSplashScreen()
         screenSplash.setKeepOnScreenCondition { false }
@@ -46,7 +33,6 @@ class MainActivity : AppCompatActivity() {
         initToolbar()
         Logger.addLogAdapter(AndroidLogAdapter())
         initSharedListener(intent.getStringExtra(Intent.EXTRA_TEXT))
-        receivePermission()
     }
 
     private fun initToolbar() {
@@ -54,30 +40,12 @@ class MainActivity : AppCompatActivity() {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.top_app_bar, menu)
             }
-
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return true
             }
         })
     }
 
-    private fun receivePermission() {
-        val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            permissions.entries.forEach { entry ->
-                val permission = entry.key
-                val isGranted = entry.value
-                if (isGranted) {
-                    Logger.d("accedio")
-                    // El usuario concedió el permiso
-                    // openFilePicker()
-                } else {
-                    // El usuario no concedió el permiso
-                }
-            }
-        }
-
-        requestPermissionLauncher.launch(multiplePermissionsNameList.toTypedArray())
-    }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)

@@ -67,6 +67,7 @@
             android:layout_marginHorizontal="16dp"
             android:checked="true"
             app:thumbTint="@color/primary"
+            app:trackTint="@color/switch_cheked_uncheked"
             />
     </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -106,8 +107,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:checked="true"
-            app:thumbTint="@color/primary" />
+            android:checked="false"
+            app:thumbTint="@color/primary"
+            app:trackTint="@color/switch_cheked_uncheked"
+            />
     </androidx.appcompat.widget.LinearLayoutCompat>
 
     <androidx.appcompat.widget.LinearLayoutCompat
@@ -147,7 +150,9 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:checked="true"
-            app:thumbTint="@color/primary" />
+            app:thumbTint="@color/primary"
+            app:trackTint="@color/switch_cheked_uncheked"
+            />
     </androidx.appcompat.widget.LinearLayoutCompat>
 
 </androidx.appcompat.widget.LinearLayoutCompat>

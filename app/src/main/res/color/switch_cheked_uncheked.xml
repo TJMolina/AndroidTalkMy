@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Color cuando el switch está desmarcado -->
+    <item android:color="@color/hint" android:state_checked="false"/>
+    <!-- Color cuando el switch está marcado -->
+    <item android:color="@color/primary" android:state_checked="true" />
+</selector>
