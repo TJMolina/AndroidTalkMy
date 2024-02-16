@@ -1,24 +1,26 @@
 package com.tjm.talkmy.ui.tasks
 
 import android.os.Bundle
-import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.tjm.talkmy.R
 import com.tjm.talkmy.databinding.FragmentTasksListBinding
 import com.tjm.talkmy.ui.tasks.adapter.TaskAdapter
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @AndroidEntryPoint
@@ -46,6 +48,19 @@ class TasksListFragment : Fragment() {
         initRecyclerView()
         initMenu()
         initListeners()
+        observeHasTasks()
+    }
+
+    private fun observeHasTasks() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            tasksListViewModel.haveTaskState.collect {
+                withContext(Dispatchers.Main) {
+                    binding.ivNoTasks.apply {
+                        visibility = if (it) View.GONE else View.VISIBLE
+                    }
+                }
+            }
+        }
     }
 
     private fun initMenu() {
@@ -61,6 +76,7 @@ class TasksListFragment : Fragment() {
                         )
                         true
                     }
+
                     else -> false
                 }
             }
@@ -70,7 +86,7 @@ class TasksListFragment : Fragment() {
     private fun initListeners() {
         binding.btnAddNota.setOnClickListener {
             findNavController().navigate(
-                TasksListFragmentDirections.actionTasksListFragmentToEditTaskFragment(null,null)
+                TasksListFragmentDirections.actionTasksListFragmentToEditTaskFragment(null, null)
             )
         }
     }
@@ -91,7 +107,7 @@ class TasksListFragment : Fragment() {
         tasksListViewModel.getLocalTasks(taskAdapter)
     }
 
-    private fun editTask(id: String, task:String) {
+    private fun editTask(id: String, task: String) {
         findNavController().navigate(
             TasksListFragmentDirections.actionTasksListFragmentToEditTaskFragment(id, task)
         )

@@ -3,65 +3,84 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    tools:context=".ui.tasks.TasksListFragment">
-
-    <ScrollView
+    android:layout_height="match_parent">
+<ImageView
+    android:id="@+id/ivNoTasks"
+    android:layout_width="200dp"
+    android:layout_height="200dp"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintBottom_toBottomOf="parent"
+    android:src="@drawable/falta_nota_talkmy"
+    android:scaleType="fitCenter"
+    />
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:paddingTop="?attr/actionBarSize"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvTasksList"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="66dp" />
-    </ScrollView>
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="wrap_content"
+        tools:context=".ui.tasks.TasksListFragment"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         >
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/topAppBarTaskList"
-            style="@style/header"
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:paddingTop="?attr/actionBarSize"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvTasksList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="66dp" />
+        </ScrollView>
+
+        <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:menu="@menu/menu_taskslist"
-            app:title="@string/app_title"
-            app:titleTextAppearance="@style/title"
-            app:titleTextColor="@color/white" />
+            android:layout_height="?attr/actionBarSize"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-    </com.google.android.material.appbar.AppBarLayout>
-    <Button
-        android:id="@+id/btnAddNota"
-        style="@style/circleButton"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginHorizontal="5dp"
-        android:layout_marginVertical="10dp"
-        android:layout_marginBottom="5dp"
-        android:text="@string/btnNewTask_ES"
-        android:textColor="@color/white"
-        app:cornerRadius="11dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintVertical_bias="1" />
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/topAppBarTaskList"
+                style="@style/header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:menu="@menu/menu_taskslist"
+                app:title="@string/app_title"
+                app:titleTextAppearance="@style/title"
+                app:titleTextColor="@color/white" />
 
-    <View
-        android:id="@id/bottom"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="50dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnAddNota" />
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <Button
+            android:id="@+id/btnAddNota"
+            style="@style/circleButton"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginHorizontal="5dp"
+            android:layout_marginVertical="10dp"
+            android:layout_marginBottom="5dp"
+            android:text="@string/btnNewTask_ES"
+            android:textColor="@color/white"
+            app:cornerRadius="11dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintVertical_bias="1" />
+
+        <View
+            android:id="@id/bottom"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="50dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnAddNota" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

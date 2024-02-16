@@ -11,6 +11,8 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.view.MenuHost
@@ -113,7 +115,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                     else -> false
                 }
             }
-
         })
     }
 
@@ -179,14 +180,24 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         }
 
         if (!taskToEdit.isNullOrEmpty()) {
-            binding.etTask.append(arg.task)
+            binding.etTask.setText(arg.task, TextView.BufferType.EDITABLE)
+            binding.etTask.viewTreeObserver.addOnGlobalLayoutListener(
+                object : ViewTreeObserver.OnGlobalLayoutListener {
+                    override fun onGlobalLayout() {
+                        binding.etTask.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                        binding.etTask.apply {
+                            requestFocus()
+                            setSelection(0)
+                        }
+                    }
+                }
+            )
             lifecycleScope.launch(Dispatchers.IO) {
                 configsViewModel.executeFunction(
-                    FunctionName.GetTask(
-                        taskToEdit
-                    )
+                    FunctionName.GetTask(taskToEdit)
                 )
             }
+
         } else {
             val urlAux = url ?: arguments?.getString("url")
             if (!urlAux.isNullOrEmpty()) {
@@ -196,7 +207,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
             }
         }
     }
-
 
     private fun observeTextFromUrl() {
         lifecycleScope.launch(Dispatchers.IO) {

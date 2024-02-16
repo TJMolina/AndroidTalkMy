@@ -119,6 +119,7 @@ class ConfigsViewModel @Inject constructor(
             nota = text,
             fecha = fecha ?: taskBeingEditing.fecha
         )
+        taskBeingEditing = Task(nota="")
         CoroutineScope(Dispatchers.IO).launch {
             uploadTaskUseCasea(auxtask)
         }

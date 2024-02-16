@@ -4,14 +4,12 @@ import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.orhanobut.logger.Logger
-import com.tjm.talkmy.domain.models.Task
 import com.tjm.talkmy.domain.useCases.DeleteTaskUseCase
 import com.tjm.talkmy.domain.useCases.getTasksUseCase
 import com.tjm.talkmy.ui.tasks.adapter.TaskAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -22,32 +20,31 @@ class TasksListViewModel @Inject constructor(
     private val deleteTaskUseCase: DeleteTaskUseCase
 ) :
     ViewModel() {
-    var recivedTask = mutableListOf<Task>()
-    var _recivedTask = MutableStateFlow(TasksState())
-
+    val haveTaskState = MutableStateFlow(false)
     @SuppressLint("NotifyDataSetChanged")
     fun getLocalTasks(taskAdapter: TaskAdapter) {
         viewModelScope.launch(Dispatchers.IO) {
             getTasksUseCase().collect { newTasks ->
                 if (newTasks.isNullOrEmpty()) {
                     withContext(Dispatchers.Main) {
-                        _recivedTask.value = TasksState(error = "Ha ocurrido un error")
+                        Logger.d("ha ocurrido un error.")
                     }
+                    haveTaskState.value = false
                 } else {
+                    haveTaskState.value = true
                     val currentTasks = taskAdapter.taskList
                     val newSize = newTasks.size
                     val currentSize = currentTasks.size
 
                     if (newSize > currentSize) {
                         if (newSize - currentSize > 1 && currentSize > 1) {
-                            Logger.d("Se añadió una nota")
+                            taskAdapter.taskList.add(newTasks[newSize - 1])
                             withContext(Dispatchers.Main) {
-                                taskAdapter.taskList.add(newTasks[newSize - 1])
                                 taskAdapter.notifyItemInserted(newSize - 1)
                             }
                         } else {
+                            taskAdapter.taskList = newTasks.toMutableList()
                             withContext(Dispatchers.Main) {
-                                taskAdapter.taskList = newTasks.toMutableList()
                                 taskAdapter.notifyDataSetChanged()
                             }
                         }
