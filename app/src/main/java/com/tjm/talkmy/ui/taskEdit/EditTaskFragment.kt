@@ -12,7 +12,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.view.MenuHost
@@ -26,6 +25,7 @@ import com.tjm.talkmy.databinding.FragmentEditTaskBinding
 import com.tjm.talkmy.domain.models.FunctionName
 import com.tjm.talkmy.ui.taskEdit.managers.TTSManager
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -40,10 +40,8 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private val dialogsViewModel by viewModels<DialogsViewModel>()
     private val configsViewModel by viewModels<ConfigsViewModel>()
-
     private lateinit var tts: TextToSpeech
     private lateinit var ttsManager: TTSManager
-
 
     private val arg: EditTaskFragmentArgs by navArgs()
 
@@ -51,18 +49,18 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        configsViewModel.getAllPreferences()
-        dialogsViewModel.getAllPreferences()
         _binding = FragmentEditTaskBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        reiveTask()
+        configsViewModel.getAllPreferences()
+        dialogsViewModel.getAllPreferences()
         initUI()
     }
 
     private fun initUI() {
+        reiveTask()
         observeTextSize()
         initEvents()
         initTTS()
@@ -180,18 +178,25 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         }
 
         if (!taskToEdit.isNullOrEmpty()) {
-            binding.etTask.setText(arg.task, TextView.BufferType.EDITABLE)
-            binding.etTask.viewTreeObserver.addOnGlobalLayoutListener(
-                object : ViewTreeObserver.OnGlobalLayoutListener {
-                    override fun onGlobalLayout() {
-                        binding.etTask.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                        binding.etTask.apply {
-                            requestFocus()
-                            setSelection(0)
-                        }
+            CoroutineScope(Dispatchers.Main).launch {
+                withContext(Dispatchers.Default) {
+                    binding.etTask.apply {
+
+                        setText(arg.task)
+                        viewTreeObserver.addOnGlobalLayoutListener(
+                            object : ViewTreeObserver.OnGlobalLayoutListener {
+                                override fun onGlobalLayout() {
+                                    binding.etTask.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                                    binding.etTask.apply {
+                                        requestFocus()
+                                        setSelection(0)
+                                    }
+                                }
+                            }
+                        )
                     }
                 }
-            )
+            }
             lifecycleScope.launch(Dispatchers.IO) {
                 configsViewModel.executeFunction(
                     FunctionName.GetTask(taskToEdit)
@@ -215,20 +220,22 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                     if (value.isLoading) {
                         binding.apply {
                             circularProgressBar.visibility = View.VISIBLE
-                            etTask.isEnabled = false
                         }
+                        binding.etTask.isEnabled = false
                     } else if (value.error.isNotBlank()) {
                         binding.apply {
                             circularProgressBar.visibility = View.GONE
-                            etTask.isEnabled = true
                         }
+                        binding.etTask.isEnabled = true
                         Toast.makeText(requireContext(), value.error, Toast.LENGTH_SHORT).show()
                     } else if (!dialogsViewModel.textGotFromUrl.isNullOrEmpty()) {
                         configsViewModel.executeFunction(FunctionName.SaveTask(binding.etTask.text.toString()))
                         binding.apply {
                             circularProgressBar.visibility = View.GONE
-                            etTask.setText(dialogsViewModel.textGotFromUrl)
-                            etTask.isEnabled = true
+                        }
+                        binding.etTask.apply {
+                            setText(dialogsViewModel.textGotFromUrl)
+                            isEnabled = true
                         }
                     }
                 }
@@ -241,8 +248,8 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
             ttsManager._isPlaying.collect { value ->
                 if (value.isSpeaking) {
                     withContext(Dispatchers.Main) {
+                        binding.etTask.isFocusableInTouchMode = false
                         binding.apply {
-                            etTask.isFocusableInTouchMode = false
                             btnPlay.visibility = View.INVISIBLE
                             btnPause.visibility = View.VISIBLE
                             rsTalkProgess.isEnabled = false
@@ -253,8 +260,8 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                         .show()
                 } else {
                     withContext(Dispatchers.Main) {
+                        binding.etTask.isFocusableInTouchMode = true
                         binding.apply {
-                            etTask.isFocusableInTouchMode = true
                             btnPlay.visibility = View.VISIBLE
                             btnPause.visibility = View.INVISIBLE
                             rsTalkProgess.isEnabled = true
@@ -270,7 +277,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private fun observeTextSize() {
         lifecycleScope.launch(Dispatchers.IO) {
-            dialogsViewModel.preferences.collectLatest {
+            dialogsViewModel.preferences.collect {
                 withContext(Dispatchers.Main) {
                     binding.etTask.textSize = it.textSize
                 }

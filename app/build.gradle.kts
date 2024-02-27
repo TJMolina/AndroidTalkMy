@@ -84,6 +84,9 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
 
+    //decodificar utf-8
+    implementation("org.apache.commons:commons-text:1.9")
+
     //splash screen
     implementation("androidx.core:core-splashscreen:1.0.1")
 
