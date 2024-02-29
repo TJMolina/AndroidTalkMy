@@ -19,6 +19,7 @@ import com.tjm.talkmy.databinding.FragmentTasksListBinding
 import com.tjm.talkmy.ui.tasks.adapter.TaskAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -41,6 +42,7 @@ class TasksListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        tasksListViewModel.getAllPreferences()
         initUI()
     }
 
@@ -109,7 +111,7 @@ class TasksListFragment : Fragment() {
 
     private fun editTask(id: String, task: String) {
         findNavController().navigate(
-            TasksListFragmentDirections.actionTasksListFragmentToEditTaskFragment(id, task)
+            TasksListFragmentDirections.actionTasksListFragmentToEditTaskFragment(taskToEdit = id,task = task,fontSize = tasksListViewModel.preferences.value.textSize)
         )
     }
 }

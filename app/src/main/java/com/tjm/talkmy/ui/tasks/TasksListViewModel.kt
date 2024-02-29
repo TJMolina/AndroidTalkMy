@@ -4,12 +4,15 @@ import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.orhanobut.logger.Logger
+import com.tjm.talkmy.data.source.preferences.Preferences
+import com.tjm.talkmy.domain.models.AllPreferences
 import com.tjm.talkmy.domain.useCases.DeleteTaskUseCase
 import com.tjm.talkmy.domain.useCases.getTasksUseCase
 import com.tjm.talkmy.ui.tasks.adapter.TaskAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -17,10 +20,13 @@ import javax.inject.Inject
 @HiltViewModel
 class TasksListViewModel @Inject constructor(
     private val getTasksUseCase: getTasksUseCase,
-    private val deleteTaskUseCase: DeleteTaskUseCase
-) :
+    private val deleteTaskUseCase: DeleteTaskUseCase,
+    val preferencesRepository: Preferences,
+    ) :
     ViewModel() {
     val haveTaskState = MutableStateFlow(false)
+    var preferences = MutableStateFlow(AllPreferences())
+
     @SuppressLint("NotifyDataSetChanged")
     fun getLocalTasks(taskAdapter: TaskAdapter) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -72,5 +78,11 @@ class TasksListViewModel @Inject constructor(
             deleteTaskUseCase(id)
         }
     }
-
+    fun getAllPreferences() {
+        viewModelScope.launch(Dispatchers.IO) {
+            preferencesRepository.getPreferences().collectLatest {
+                preferences.value = it
+            }
+        }
+    }
 }

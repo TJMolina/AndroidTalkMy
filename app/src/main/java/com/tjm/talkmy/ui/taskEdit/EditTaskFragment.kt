@@ -12,6 +12,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.view.MenuHost
@@ -20,6 +22,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import com.orhanobut.logger.Logger
 import com.tjm.talkmy.R
 import com.tjm.talkmy.databinding.FragmentEditTaskBinding
 import com.tjm.talkmy.domain.models.FunctionName
@@ -49,13 +52,13 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        configsViewModel.getAllPreferences()
+        dialogsViewModel.getAllPreferences()
         _binding = FragmentEditTaskBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        configsViewModel.getAllPreferences()
-        dialogsViewModel.getAllPreferences()
         initUI()
     }
 
@@ -176,38 +179,56 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         } catch (e: Exception) {
             null
         }
-
+        //if isn't editing a note
         if (!taskToEdit.isNullOrEmpty()) {
-            CoroutineScope(Dispatchers.Main).launch {
-                withContext(Dispatchers.Default) {
-                    binding.etTask.apply {
-
-                        setText(arg.task)
-                        viewTreeObserver.addOnGlobalLayoutListener(
-                            object : ViewTreeObserver.OnGlobalLayoutListener {
-                                override fun onGlobalLayout() {
-                                    binding.etTask.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                                    binding.etTask.apply {
-                                        requestFocus()
-                                        setSelection(0)
-                                    }
-                                }
-                            }
-                        )
-                    }
-                }
-            }
+            insertTextIntoEditText(arg.task, binding.etTask, binding.tvTextAux, arg.fontSize)
             lifecycleScope.launch(Dispatchers.IO) {
                 configsViewModel.executeFunction(
                     FunctionName.GetTask(taskToEdit)
                 )
             }
 
+            //if received  an url from mainactivity
         } else {
             val urlAux = url ?: arguments?.getString("url")
             if (!urlAux.isNullOrEmpty()) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     dialogsViewModel.getTextFromUrl(urlAux)
+                }
+            }
+        }
+    }
+    private fun insertTextIntoEditText(
+        text: String?,
+        editText: EditText,
+        auxTextView: TextView? = null,
+        fontSize: Float? = null
+    ) {
+        if (auxTextView != null) {
+            editText.hint = ""
+            auxTextView.visibility = View.VISIBLE
+            fontSize?.let { auxTextView.textSize = it }
+            auxTextView.text = text?.chunked(1000)?.get(0)
+        }
+        CoroutineScope(Dispatchers.Main).launch {
+            withContext(Dispatchers.Default) {
+                try {
+                    editText.setText(text)
+                    editText.viewTreeObserver.addOnGlobalLayoutListener(
+                        object : ViewTreeObserver.OnGlobalLayoutListener {
+                            override fun onGlobalLayout() {
+                                editText.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                                auxTextView?.visibility = View.GONE
+                                editText.apply {
+                                    requestFocus()
+                                    setSelection(0)
+                                    hint = getString(R.string.editTaskHint_ES)
+                                }
+                            }
+                        }
+                    )
+                } catch (e: Exception) {
+                    Logger.d(e)
                 }
             }
         }
@@ -227,16 +248,18 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                             circularProgressBar.visibility = View.GONE
                         }
                         binding.etTask.isEnabled = true
-                        Toast.makeText(requireContext(), value.error, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), value.error, Toast.LENGTH_SHORT)
+                            .show()
                     } else if (!dialogsViewModel.textGotFromUrl.isNullOrEmpty()) {
                         configsViewModel.executeFunction(FunctionName.SaveTask(binding.etTask.text.toString()))
                         binding.apply {
                             circularProgressBar.visibility = View.GONE
                         }
-                        binding.etTask.apply {
-                            setText(dialogsViewModel.textGotFromUrl)
-                            isEnabled = true
-                        }
+                        insertTextIntoEditText(
+                            dialogsViewModel.textGotFromUrl,
+                            binding.etTask
+                        )
+                        binding.etTask.isEnabled = true
                     }
                 }
             }
@@ -256,7 +279,11 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                         }
                     }
                 } else if (value.error.isNotBlank()) {
-                    Toast.makeText(requireContext(), "Un error a ocurrido.", Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        requireContext(),
+                        "Un error a ocurrido.",
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                 } else {
                     withContext(Dispatchers.Main) {

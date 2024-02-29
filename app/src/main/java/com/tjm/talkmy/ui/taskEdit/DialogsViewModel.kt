@@ -40,7 +40,6 @@ import javax.inject.Inject
 class DialogsViewModel @Inject constructor(
     val preferencesRepository: Preferences,
     private val getTextFromUrlUseCase: GetTextFromUrlUseCase
-
 ) :
     ViewModel() {
     var preferences = MutableStateFlow(AllPreferences())

@@ -10,10 +10,10 @@
         android:id="@+id/containerTopAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        >
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/topAppBar"
             style="@style/header"
@@ -26,88 +26,55 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-        <ScrollView
+    <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clickable="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintTop_toBottomOf="@+id/containerTopAppBar"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
->
-    <!--
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/containerTopAppBar">
+
         <EditText
+            android:id="@+id/etTask"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/etTask"
-            android:background="@android:color/transparent"
+            android:background="@null"
+            android:clickable="false"
             android:contextClickable="false"
             android:gravity="top|start"
             android:hint="@string/editTaskHint_ES"
-            android:inputType="textMultiLine"
+            android:imeOptions="flagNoExtractUi"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine|textLongMessage|textCapSentences|textAutoCorrect"
+            android:linksClickable="true"
             android:minHeight="600dp"
             android:paddingHorizontal="8dp"
             android:paddingTop="8dp"
             android:paddingBottom="125dp"
+            android:textAppearance="?textAppearanceBody1"
             android:textColor="@color/text"
-            />
-            -->
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/etTask"
-        android:contextClickable="false"
-        android:gravity="top|start"
-        android:hint="@string/editTaskHint_ES"
-        android:minHeight="600dp"
-        android:paddingHorizontal="8dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="125dp"
-        android:textColor="@color/text"
-        android:clickable="false"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:background="@null"
-        android:imeOptions="flagNoExtractUi"
-        android:importantForAutofill="no"
-        android:inputType="textMultiLine|textLongMessage|textCapSentences|textAutoCorrect"
-        android:linksClickable="true"
-        android:textAppearance="?textAppearanceBody1"
-        android:textDirection="anyRtl"
-        android:textSize="15sp"
-        />
+            android:textSize="15sp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
     </ScrollView>
-<!--
-    <EditText
+
+    <TextView
+        android:id="@+id/tvTextAux"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:id="@+id/etTask"
-        android:contextClickable="false"
-        android:gravity="top|start"
-        android:hint="@string/editTaskHint_ES"
-        android:minHeight="600dp"
+        android:visibility="gone"
         android:paddingHorizontal="8dp"
         android:paddingTop="8dp"
         android:paddingBottom="125dp"
-        android:textColor="@color/text"
-        android:clickable="false"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintTop_toBottomOf="@+id/containerTopAppBar"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-
-        android:background="@null"
-        android:imeOptions="flagNoExtractUi"
-        android:importantForAutofill="no"
-        android:inputType="textMultiLine|textLongMessage|textCapSentences|textAutoCorrect"
-        android:linksClickable="true"
         android:textAppearance="?textAppearanceBody1"
-        android:textDirection="anyRtl"
+        android:textColor="@color/text"
         android:textSize="15sp"
-        />
-     -->
+        android:background="@null"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/containerTopAppBar" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/linearLayoutCompat"

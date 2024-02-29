@@ -13,8 +13,6 @@
         <action
             android:id="@+id/action_tasksListFragment_to_editTaskFragment"
             app:destination="@id/editTaskFragment"
-            app:enterAnim="@android:anim/slide_in_left"
-            app:exitAnim="@android:anim/slide_out_right"
             app:popEnterAnim="@android:anim/slide_in_left"
             app:popExitAnim="@android:anim/slide_out_right" />
         <action
@@ -38,6 +36,10 @@
             android:name="task"
             app:argType="string"
             app:nullable="true" />
+        <argument
+            android:name="fontSize"
+            app:argType="float"
+            android:defaultValue="12.0" />
     </fragment>
     <fragment
         android:id="@+id/optionsFragment"
