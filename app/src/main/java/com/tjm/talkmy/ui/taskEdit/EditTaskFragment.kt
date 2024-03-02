@@ -1,6 +1,7 @@
 package com.tjm.talkmy.ui.taskEdit
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.util.Log
@@ -8,10 +9,10 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
@@ -22,13 +23,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import com.orhanobut.logger.Logger
 import com.tjm.talkmy.R
 import com.tjm.talkmy.databinding.FragmentEditTaskBinding
 import com.tjm.talkmy.domain.models.FunctionName
 import com.tjm.talkmy.ui.taskEdit.managers.TTSManager
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -151,13 +150,12 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                 }
             }
         }
-        configsViewModel.executeFunction(FunctionName.ClickParagraph() {
-            binding.etTask.setOnTouchListener { _, event ->
-                if (event.action == MotionEvent.ACTION_DOWN) {
-                    val position = binding.etTask.getOffsetForPosition(event.x, event.y)
-                    ttsManager.findStartByAproxStart(position, binding.etTask.text.toString())
-                }
-                false
+        configsViewModel.executeFunction(FunctionName.ClickParagraph {
+            binding.etTask.setOnClickListener {
+                ttsManager.findStartByAproxStart(
+                    binding.etTask.selectionStart,
+                    binding.etTask.text.toString()
+                )
             }
         })
     }
@@ -198,6 +196,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
             }
         }
     }
+
     private fun insertTextIntoEditText(
         text: String?,
         editText: EditText,
@@ -210,27 +209,24 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
             fontSize?.let { auxTextView.textSize = it }
             auxTextView.text = text?.chunked(1000)?.get(0)
         }
-        CoroutineScope(Dispatchers.Main).launch {
-            withContext(Dispatchers.Default) {
-                try {
-                    editText.setText(text)
-                    editText.viewTreeObserver.addOnGlobalLayoutListener(
-                        object : ViewTreeObserver.OnGlobalLayoutListener {
-                            override fun onGlobalLayout() {
-                                editText.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                                auxTextView?.visibility = View.GONE
-                                editText.apply {
-                                    requestFocus()
-                                    setSelection(0)
-                                    hint = getString(R.string.editTaskHint_ES)
-                                }
+        lifecycleScope.launch(Dispatchers.Main) {
+            editText.viewTreeObserver.addOnGlobalLayoutListener(
+                object : ViewTreeObserver.OnGlobalLayoutListener {
+                    override fun onGlobalLayout() {
+                        requireActivity().runOnUiThread {
+                            editText.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                            editText.apply {
+                                hint = getString(R.string.editTaskHint_ES)
+                                setSelection(0)
                             }
+                            auxTextView?.visibility = View.GONE
+                            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                            imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
                         }
-                    )
-                } catch (e: Exception) {
-                    Logger.d(e)
+                    }
                 }
-            }
+            )
+            withContext(Dispatchers.Default) { editText.setText(text) }
         }
     }
 
@@ -252,14 +248,9 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                             .show()
                     } else if (!dialogsViewModel.textGotFromUrl.isNullOrEmpty()) {
                         configsViewModel.executeFunction(FunctionName.SaveTask(binding.etTask.text.toString()))
-                        binding.apply {
-                            circularProgressBar.visibility = View.GONE
-                        }
-                        insertTextIntoEditText(
-                            dialogsViewModel.textGotFromUrl,
-                            binding.etTask
-                        )
+                        binding.circularProgressBar.visibility = View.GONE
                         binding.etTask.isEnabled = true
+                        binding.etTask.setText(dialogsViewModel.textGotFromUrl)
                     }
                 }
             }
