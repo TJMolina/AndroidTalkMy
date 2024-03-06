@@ -1,6 +1,7 @@
 package com.tjm.talkmy.ui.tasks
 
 import android.annotation.SuppressLint
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.orhanobut.logger.Logger
@@ -9,6 +10,7 @@ import com.tjm.talkmy.domain.models.AllPreferences
 import com.tjm.talkmy.domain.useCases.DeleteTaskUseCase
 import com.tjm.talkmy.domain.useCases.getTasksUseCase
 import com.tjm.talkmy.ui.tasks.adapter.TaskAdapter
+import com.tjm.talkmy.ui.tasks.dialog.DialogDeleteTask
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,10 +24,11 @@ class TasksListViewModel @Inject constructor(
     private val getTasksUseCase: getTasksUseCase,
     private val deleteTaskUseCase: DeleteTaskUseCase,
     val preferencesRepository: Preferences,
-    ) :
+) :
     ViewModel() {
     val haveTaskState = MutableStateFlow(false)
     var preferences = MutableStateFlow(AllPreferences())
+    val deleteTaskDialog = DialogDeleteTask()
 
     @SuppressLint("NotifyDataSetChanged")
     fun getLocalTasks(taskAdapter: TaskAdapter) {
@@ -71,13 +74,23 @@ class TasksListViewModel @Inject constructor(
         }
     }
 
-    fun deleteTask(id: String, position: Int, taskAdapter: TaskAdapter) {
-        taskAdapter.taskList.removeAt(position)
-        taskAdapter.notifyItemRemoved(position)
-        viewModelScope.launch {
-            deleteTaskUseCase(id)
+
+    fun deleteTask(
+        id: String,
+        position: Int,
+        taskAdapter: TaskAdapter,
+        parentFragmentManager: FragmentManager
+    ) {
+        deleteTaskDialog.delete = {
+            taskAdapter.taskList.removeAt(position)
+            taskAdapter.notifyItemRemoved(position)
+            viewModelScope.launch {
+                deleteTaskUseCase(id)
+            }
         }
+        deleteTaskDialog.show(parentFragmentManager, "DeleteTaskDialog")
     }
+
     fun getAllPreferences() {
         viewModelScope.launch(Dispatchers.IO) {
             preferencesRepository.getPreferences().collectLatest {

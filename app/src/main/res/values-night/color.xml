@@ -8,7 +8,8 @@
     <color name="text">#FFFFFFFF</color>
     <color name="hint">#D3D1D5</color>
     <color name="highlit">#59b4df</color>
-
+    <color name="borderCard">#FFFFFFFF</color>
+    <color name="background">#202020</color>
     <!--shapes-->
     <color name="background_difuminado_end">#00000000</color>
     <color name="background_difuminado_center">#99000000</color>

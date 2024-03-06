@@ -19,7 +19,6 @@ import com.tjm.talkmy.databinding.FragmentTasksListBinding
 import com.tjm.talkmy.ui.tasks.adapter.TaskAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -101,7 +100,8 @@ class TasksListFragment : Fragment() {
                 tasksListViewModel.deleteTask(
                     id,
                     position,
-                    taskAdapter
+                    taskAdapter,
+                    parentFragmentManager
                 )
             })
         binding.rvTasksList.layoutManager = manager

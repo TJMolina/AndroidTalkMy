@@ -1,7 +1,6 @@
 package com.tjm.talkmy.ui.taskEdit
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.util.Log
@@ -11,10 +10,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.view.MenuHost
@@ -44,7 +40,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private val configsViewModel by viewModels<ConfigsViewModel>()
     private lateinit var tts: TextToSpeech
     private lateinit var ttsManager: TTSManager
-
     private val arg: EditTaskFragmentArgs by navArgs()
 
     override fun onCreateView(
@@ -179,7 +174,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         }
         //if isn't editing a note
         if (!taskToEdit.isNullOrEmpty()) {
-            insertTextIntoEditText(arg.task, binding.etTask, binding.tvTextAux, arg.fontSize)
+            insertTextIntoEditText(arg.task!!, binding.etTask, arg.fontSize)
             lifecycleScope.launch(Dispatchers.IO) {
                 configsViewModel.executeFunction(
                     FunctionName.GetTask(taskToEdit)
@@ -198,35 +193,16 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     private fun insertTextIntoEditText(
-        text: String?,
+        text: String,
         editText: EditText,
-        auxTextView: TextView? = null,
         fontSize: Float? = null
     ) {
-        if (auxTextView != null) {
-            editText.hint = ""
-            auxTextView.visibility = View.VISIBLE
-            fontSize?.let { auxTextView.textSize = it }
-            auxTextView.text = text?.chunked(1000)?.get(0)
+        if (fontSize != null) {
+            editText.textSize = fontSize
         }
-        lifecycleScope.launch(Dispatchers.Main) {
-            editText.viewTreeObserver.addOnGlobalLayoutListener(
-                object : ViewTreeObserver.OnGlobalLayoutListener {
-                    override fun onGlobalLayout() {
-                        requireActivity().runOnUiThread {
-                            editText.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                            editText.apply {
-                                hint = getString(R.string.editTaskHint_ES)
-                                setSelection(0)
-                            }
-                            auxTextView?.visibility = View.GONE
-                            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                            imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
-                        }
-                    }
-                }
-            )
-            withContext(Dispatchers.Default) { editText.setText(text) }
+        editText.setSelection(0)
+        requireActivity().runOnUiThread {
+            editText.setText(text)
         }
     }
 
@@ -250,7 +226,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                         configsViewModel.executeFunction(FunctionName.SaveTask(binding.etTask.text.toString()))
                         binding.circularProgressBar.visibility = View.GONE
                         binding.etTask.isEnabled = true
-                        binding.etTask.setText(dialogsViewModel.textGotFromUrl)
+                        insertTextIntoEditText(dialogsViewModel.textGotFromUrl!!, binding.etTask)
                     }
                 }
             }

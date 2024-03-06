@@ -1,106 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:elevation="8dp"
-    app:cardBackgroundColor="@color/secondary"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
-    android:layout_marginVertical="8dp"
-    >
+    app:cardBackgroundColor="@color/borderCard"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="8dp"
+    android:layout_marginTop="8dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="120dp"
-        >
-        <Button
-            android:id="@+id/textBold25characters"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:gravity="start|top"
-            android:singleLine="true"
-            tools:text="Otro texto auxiliar"
-            android:textColor="@color/text"
-            android:textSize="15sp"
-            android:textAllCaps="false"
-            android:background="?android:attr/selectableItemBackground"
-            app:layout_constraintEnd_toStartOf="@id/guideButtonsTask"
-            app:layout_constraintStart_toStartOf="parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="1dp"
+        app:cardBackgroundColor="@color/background"
+        app:cardCornerRadius="8dp">
 
-            />
-        <Button
-            android:id="@+id/tvTask"
-            android:layout_height="match_parent"
-            android:layout_width="0dp"
-            android:paddingTop="25sp"
-            android:text="Línea 1 con estilo de negrita"
-            android:textAllCaps="false"
-            android:ellipsize="end"
-            android:gravity="start|top"
-            android:textSize="15sp"
-            android:textColor="@color/text"
-            android:background="?android:attr/selectableItemBackground"
-            app:layout_constraintEnd_toStartOf="@id/guideButtonsTask"
-            app:layout_constraintStart_toStartOf="parent"
-            />
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideButtonsTask"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent=".85" />
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/guideButtonsTask"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_width="match_parent"
+            android:layout_height="120dp">
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cvDeleteTask"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:backgroundTint="@android:color/transparent"
-                app:cardElevation="1dp"
-                app:layout_constraintBottom_toTopOf="@+id/cvCompleteTask"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_height="match_parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/guideButtonsTask"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btnDeleteTask"
+                <Button
+                    android:id="@+id/textBold25characters"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:background="?android:attr/selectableItemBackground"
+                    android:gravity="start|top"
+                    android:singleLine="true"
+                    android:textColor="@color/text"
+                    android:textSize="20sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    />
+
+                <Button
+                    android:id="@+id/tvTask"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="1dp"
-                    android:drawableLeft="@drawable/ic_delete"
-                    android:drawableTint="@color/text"
-                    android:paddingLeft="16dp" />
-            </androidx.cardview.widget.CardView>
+                    android:background="?android:attr/selectableItemBackground"
+                    android:ellipsize="end"
+                    android:gravity="start|top"
+                    android:paddingTop="30sp"
+                    android:textColor="@color/text"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cvCompleteTask"
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideButtonsTask"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent=".85" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:backgroundTint="@android:color/transparent"
-                app:cardElevation="1dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/cvDeleteTask">
+                android:layout_height="match_parent"
+                app:layout_constraintStart_toEndOf="@id/guideButtonsTask"
+                app:layout_constraintEnd_toEndOf="parent">
 
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btnCompleteTask"
-                    android:background="?android:attr/selectableItemBackground"
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="1dp"
-                    android:drawableLeft="@drawable/ic_check"
-                    android:drawableTint="@color/text"
-                    android:paddingLeft="16dp" />
-            </androidx.cardview.widget.CardView>
+                    android:layout_height="match_parent">
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cvDeleteTask"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:backgroundTint="@color/borderCard">
+
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_margin="1dp"
+                            android:backgroundTint="@color/background">
+
+                            <androidx.appcompat.widget.AppCompatButton
+                                android:id="@+id/btnDeleteTask"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_margin="1dp"
+                                android:background="?android:attr/selectableItemBackground"
+                                android:drawableStart="@drawable/ic_delete"
+                                android:drawableTint="@color/text"
+                                android:paddingStart="15dp" />
+                        </androidx.cardview.widget.CardView>
+                    </androidx.cardview.widget.CardView>
+                </androidx.appcompat.widget.LinearLayoutCompat>
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 </androidx.cardview.widget.CardView>

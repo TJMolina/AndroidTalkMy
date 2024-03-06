@@ -5,6 +5,11 @@
 
     <!-- TaskListFragment -->
     <string name="btnNewTask_ES">+ Agregar nueva nota</string>
+    <string name="dialog_deleteTask_title_ES">Eliminar nota</string>
+    <string name="dialog_deleteTask_description_ES">¿Estas seguro de que quieres eliminar esta nota? No podras recuperarla.</string>
+    <string name="dialog_deleteTask_accept_ES">Eliminar</string>
+    <string name="dialog_deleteTask_cancel_ES">Cancelar</string>
+
 
 
     <!-- EditTaskFragment -->

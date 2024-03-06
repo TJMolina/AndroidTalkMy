@@ -3,13 +3,14 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="primary">#2563eb</color>
+    <color name="secondary">#FFFFFFFF</color>
     <color name="acceptCancelButtons">#2563eb</color>
     <color name="text">#FF000000</color>
-    <color name="secondary">#FFFFFFFF</color>
     <color name="hint">#FF5A595B</color>
     <color name="highlit">#59b4df</color>
     <color name="splahsColor">#2563eb</color>
-
+    <color name="borderCard">#b4b4b4</color>
+    <color name="background">#FFFFFFFF</color>
     <!--shapes-->
     <color name="background_difuminado_end">#00FFFFFF</color>
     <color name="background_difuminado_center">#EEFFFFFF</color>
