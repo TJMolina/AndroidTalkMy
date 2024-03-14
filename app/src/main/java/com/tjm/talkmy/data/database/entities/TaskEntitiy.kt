@@ -19,6 +19,6 @@ data class TaskEntitiy(
     fun toDomain() = Task(id = id, nota = nota, fecha = fecha, completada = completada)
 }
 
-fun Task.toDatabase() =
-    TaskEntitiy(id = this.id ?: UUID.randomUUID().toString(), nota = this.nota, completada = this.completada, fecha = this.fecha?:SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date()))
+fun Task.toDatabase() = TaskEntitiy(id = this.id, nota = this.nota, completada = this.completada, fecha = this.fecha)
+
 

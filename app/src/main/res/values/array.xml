@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="options_ordernotes">
+        <item value="1">Viejo->Nuevo</item>
+        <item value="2">Nuevo->Viejo</item>
+    </string-array>
+</resources>

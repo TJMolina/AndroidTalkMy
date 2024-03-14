@@ -8,5 +8,6 @@ enum class PreferencesType {
     VOICE,
     NEXTTASK,
     SAVEONLINE,
-    CLICKPARAGRAPH
+    CLICKPARAGRAPH,
+    ORDERNOTE
 }

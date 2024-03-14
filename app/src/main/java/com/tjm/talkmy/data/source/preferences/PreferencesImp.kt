@@ -26,7 +26,8 @@ class PreferencesImp @Inject constructor(private val context: Context) : Prefere
             voice = it[stringPreferencesKey(PreferencesType.VOICE.name)] ?: "",
             readNextTask = it[booleanPreferencesKey(PreferencesType.NEXTTASK.name)] ?: false,
             saveOnline = it[booleanPreferencesKey(PreferencesType.SAVEONLINE.name)] ?: false,
-            clickParagraph = it[booleanPreferencesKey(PreferencesType.CLICKPARAGRAPH.name)]?: false
+            clickParagraph = it[booleanPreferencesKey(PreferencesType.CLICKPARAGRAPH.name)]?: false,
+            orderNote = it[booleanPreferencesKey(PreferencesType.ORDERNOTE.name)]?:false
         )
     }
 

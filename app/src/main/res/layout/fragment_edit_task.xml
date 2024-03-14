@@ -54,6 +54,7 @@
                 android:id="@+id/etTask"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@null"
                 android:gravity="top|start"
                 android:hint="@string/editTaskHint_ES"
                 android:importantForAutofill="no"

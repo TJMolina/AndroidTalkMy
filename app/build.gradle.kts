@@ -32,6 +32,7 @@ android {
         getByName("debug"){
             isDebuggable = true
             buildConfigField("String", "BASE_URL", "\"https://talkmy.vercel.app/api/\"")
+            //buildConfigField("String", "BASE_URL", "\"http://192.168.2.107:3000/api/\"")
         }
     }
 

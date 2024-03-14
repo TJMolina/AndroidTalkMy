@@ -15,7 +15,6 @@ class TaskAdapter(
         val layoutInflater = LayoutInflater.from(parent.context)
         return TaskViewHolder(layoutInflater.inflate(R.layout.item_task, parent, false))
     }
-
     override fun getItemCount() = taskList.size
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {

@@ -84,7 +84,7 @@ class TasksListViewModel @Inject constructor(
         deleteTaskDialog.delete = {
             taskAdapter.taskList.removeAt(position)
             taskAdapter.notifyItemRemoved(position)
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.IO) {
                 deleteTaskUseCase(id)
             }
         }

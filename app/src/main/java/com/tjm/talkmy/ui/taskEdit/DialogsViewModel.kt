@@ -110,11 +110,9 @@ class DialogsViewModel @Inject constructor(
                     textGotFromUrl = it.data
                     _getTextFromUrlProcces.value = LoadingErrorState(isLoading = false)
                 }
-
                 is ResponseState.Error -> {
                     _getTextFromUrlProcces.value = LoadingErrorState(error = it.toString())
                 }
-
                 is ResponseState.Loading -> {
                     _getTextFromUrlProcces.value = LoadingErrorState(isLoading = true)
                 }

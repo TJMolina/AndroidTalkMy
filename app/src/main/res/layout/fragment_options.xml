@@ -7,28 +7,23 @@
     android:orientation="vertical"
     tools:context=".ui.configs.OptionsFragment">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:id="@+id/toolBar"
-        style="@style/header"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:layout_marginBottom="8dp">
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBarTaskList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:title="@string/app_title"
+            app:titleTextAppearance="@style/title"
+            style="@style/header"
+            />
+    </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:paddingLeft="16dp"
-                android:text="TalkMy!"
-                android:textColor="@color/white"
-                android:textSize="30sp" />
-        </androidx.appcompat.widget.LinearLayoutCompat>
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
+    <!-- Read Next Note -->
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -67,10 +62,10 @@
             android:layout_marginHorizontal="16dp"
             android:checked="true"
             app:thumbTint="@color/primary"
-            app:trackTint="@color/switch_cheked_uncheked"
-            />
+            app:trackTint="@color/switch_cheked_uncheked" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 
+    <!-- Save Online -->
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -109,10 +104,10 @@
             android:layout_marginHorizontal="16dp"
             android:checked="false"
             app:thumbTint="@color/primary"
-            app:trackTint="@color/switch_cheked_uncheked"
-            />
+            app:trackTint="@color/switch_cheked_uncheked" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 
+    <!-- Click paragraph -->
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -151,7 +146,46 @@
             android:layout_marginHorizontal="16dp"
             android:checked="true"
             app:thumbTint="@color/primary"
-            app:trackTint="@color/switch_cheked_uncheked"
+            app:trackTint="@color/switch_cheked_uncheked" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <!-- Order of notes -->
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center">
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_reorder" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Orden de notas"
+                android:textColor="@color/text"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mostrar las notas guardadas en cierto orden. Por defecto se muestran de la mas nueva a la mas vieja."
+                android:textSize="12sp" />
+        </LinearLayout>
+        <Spinner
+            android:id="@+id/spinnerOrderNotes"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
             />
     </androidx.appcompat.widget.LinearLayoutCompat>
 

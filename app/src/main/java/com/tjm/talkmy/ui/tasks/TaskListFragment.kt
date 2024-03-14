@@ -47,10 +47,12 @@ class TasksListFragment : Fragment() {
 
     private fun initUI() {
         initRecyclerView()
+        observeOrder()
         initMenu()
         initListeners()
         observeHasTasks()
     }
+
 
     private fun observeHasTasks() {
         lifecycleScope.launch(Dispatchers.IO) {
@@ -109,9 +111,29 @@ class TasksListFragment : Fragment() {
         tasksListViewModel.getLocalTasks(taskAdapter)
     }
 
+    private fun observeOrder() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            tasksListViewModel.preferences.collect {
+                val layoutManagerFirstToLast =
+                    LinearLayoutManager(
+                        requireContext(),
+                        LinearLayoutManager.VERTICAL,
+                        it.orderNote
+                    )
+                withContext(Dispatchers.Main) {
+                    binding.rvTasksList.layoutManager = layoutManagerFirstToLast
+                }
+            }
+        }
+    }
+
     private fun editTask(id: String, task: String) {
         findNavController().navigate(
-            TasksListFragmentDirections.actionTasksListFragmentToEditTaskFragment(taskToEdit = id,task = task,fontSize = tasksListViewModel.preferences.value.textSize)
+            TasksListFragmentDirections.actionTasksListFragmentToEditTaskFragment(
+                taskToEdit = id,
+                task = task,
+                fontSize = tasksListViewModel.preferences.value.textSize
+            )
         )
     }
 }

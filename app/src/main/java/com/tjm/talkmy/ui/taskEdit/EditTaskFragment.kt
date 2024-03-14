@@ -1,6 +1,7 @@
 package com.tjm.talkmy.ui.taskEdit
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.util.Log
@@ -10,6 +11,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.addCallback
@@ -21,7 +23,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.tjm.talkmy.R
 import com.tjm.talkmy.databinding.FragmentEditTaskBinding
+import com.tjm.talkmy.domain.models.AllPreferences
 import com.tjm.talkmy.domain.models.FunctionName
+import com.tjm.talkmy.domain.models.Task
+import com.tjm.talkmy.ui.core.states.SpeakingState
 import com.tjm.talkmy.ui.taskEdit.managers.TTSManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +42,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private val binding get() = _binding!!
 
     private val dialogsViewModel by viewModels<DialogsViewModel>()
-    private val configsViewModel by viewModels<ConfigsViewModel>()
+    private val editTaskViewModel by viewModels<EditTaskViewModel>()
     private lateinit var tts: TextToSpeech
     private lateinit var ttsManager: TTSManager
     private val arg: EditTaskFragmentArgs by navArgs()
@@ -46,7 +51,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        configsViewModel.getAllPreferences()
+        editTaskViewModel.getAllPreferences()
         dialogsViewModel.getAllPreferences()
         _binding = FragmentEditTaskBinding.inflate(inflater, container, false)
         return binding.root
@@ -122,7 +127,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private fun initEvents() {
         requireActivity().onBackPressedDispatcher.addCallback(this) {
-            configsViewModel.executeFunction(FunctionName.SaveTask(binding.etTask.text.toString()))
+            editTaskViewModel.executeFunction(FunctionName.SaveTask(binding.etTask.text.toString()))
             isEnabled = false
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
@@ -145,7 +150,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                 }
             }
         }
-        configsViewModel.executeFunction(FunctionName.ClickParagraph {
+        editTaskViewModel.executeFunction(FunctionName.ClickParagraph {
             binding.etTask.setOnClickListener {
                 ttsManager.findStartByAproxStart(
                     binding.etTask.selectionStart,
@@ -176,7 +181,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         if (!taskToEdit.isNullOrEmpty()) {
             insertTextIntoEditText(arg.task!!, binding.etTask, arg.fontSize)
             lifecycleScope.launch(Dispatchers.IO) {
-                configsViewModel.executeFunction(
+                editTaskViewModel.executeFunction(
                     FunctionName.GetTask(taskToEdit)
                 )
             }
@@ -208,114 +213,149 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private fun observeTextFromUrl() {
         lifecycleScope.launch(Dispatchers.IO) {
-            dialogsViewModel.getTextFromUrlProcces.collectLatest { value ->
+            dialogsViewModel.getTextFromUrlProcces.collect { value ->
                 withContext(Dispatchers.Main) {
-                    if (value.isLoading) {
-                        binding.apply {
-                            circularProgressBar.visibility = View.VISIBLE
-                        }
-                        binding.etTask.isEnabled = false
-                    } else if (value.error.isNotBlank()) {
-                        binding.apply {
+                    binding.apply {
+                        if (value.isLoading) {
+                            editTaskViewModel.executeFunction(FunctionName.SaveTask(binding.etTask.text.toString()))
+                            circularProgressBar.visibility =
+                                if (value.isLoading) View.VISIBLE else View.GONE
+                            etTask.isEnabled = value.error.isBlank()
+                        } else {
                             circularProgressBar.visibility = View.GONE
+                            etTask.isEnabled = true
+                            if (value.error.isBlank() && !dialogsViewModel.textGotFromUrl.isNullOrEmpty()) {
+                                insertTextIntoEditText(
+                                    dialogsViewModel.textGotFromUrl!!,
+                                    binding.etTask
+                                )
+                                editTaskViewModel.taskBeingEditing = Task(nota = "")
+                                editTaskViewModel.executeFunction(FunctionName.SaveTask(binding.etTask.text.toString()))
+                            }
+
                         }
-                        binding.etTask.isEnabled = true
-                        Toast.makeText(requireContext(), value.error, Toast.LENGTH_SHORT)
-                            .show()
-                    } else if (!dialogsViewModel.textGotFromUrl.isNullOrEmpty()) {
-                        configsViewModel.executeFunction(FunctionName.SaveTask(binding.etTask.text.toString()))
-                        binding.circularProgressBar.visibility = View.GONE
-                        binding.etTask.isEnabled = true
-                        insertTextIntoEditText(dialogsViewModel.textGotFromUrl!!, binding.etTask)
                     }
                 }
             }
         }
     }
 
-    private fun observeIsplaying() {
+    @SuppressLint("ClickableViewAccessibility")
+    private fun observeIsPlaying() {
         lifecycleScope.launch(Dispatchers.IO) {
             ttsManager._isPlaying.collect { value ->
                 if (value.isSpeaking) {
-                    withContext(Dispatchers.Main) {
-                        binding.etTask.isFocusableInTouchMode = false
-                        binding.apply {
-                            btnPlay.visibility = View.INVISIBLE
-                            btnPause.visibility = View.VISIBLE
-                            rsTalkProgess.isEnabled = false
-                        }
-                    }
+                    binding.etTask.setOnTouchListener { v, event -> true }
+                    hideKeyboardAndSetUiState()
                 } else if (value.error.isNotBlank()) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Un error a ocurrido.",
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    showErrorToast()
                 } else {
-                    withContext(Dispatchers.Main) {
-                        binding.etTask.isFocusableInTouchMode = true
-                        binding.apply {
-                            btnPlay.visibility = View.VISIBLE
-                            btnPause.visibility = View.INVISIBLE
-                            rsTalkProgess.isEnabled = true
-                        }
-                    }
+                    resetUiState()
                 }
-                if (value.finalized && !value.isSpeaking) {
-                    configsViewModel.executeFunction(FunctionName.ReadNextTask(binding.etTask) { play() })
-                }
+                executeNextTaskIfFinalized(value)
             }
+        }
+    }
+
+    private suspend fun hideKeyboardAndSetUiState() {
+        withContext(Dispatchers.Main) {
+            hideKeyboard()
+            updateUiForSpeakingState()
+        }
+    }
+
+    private fun hideKeyboard() {
+        val inputMethodManager =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(binding.etTask.windowToken, 0)
+        binding.etTask.clearFocus()
+    }
+
+    private fun updateUiForSpeakingState() {
+        binding.apply {
+            btnPlay.visibility = View.INVISIBLE
+            btnPause.visibility = View.VISIBLE
+            rsTalkProgess.isEnabled = false
+        }
+    }
+
+    private fun showErrorToast() {
+        Toast.makeText(
+            requireContext(),
+            "Un error a ocurrido.",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private suspend fun resetUiState() {
+        withContext(Dispatchers.Main) {
+            binding.apply {
+                etTask.setOnTouchListener(null)
+                btnPlay.visibility = View.VISIBLE
+                btnPause.visibility = View.INVISIBLE
+                rsTalkProgess.isEnabled = true
+            }
+        }
+    }
+
+    private fun executeNextTaskIfFinalized(value: SpeakingState) {
+        if (value.finalized && !value.isSpeaking) {
+            editTaskViewModel.executeFunction(FunctionName.ReadNextTask(binding.etTask) { play() })
         }
     }
 
     private fun observeTextSize() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            dialogsViewModel.preferences.collect {
-                withContext(Dispatchers.Main) {
-                    binding.etTask.textSize = it.textSize
-                }
+        lifecycleScope.launch {
+            dialogsViewModel.preferences.collect { textSize ->
+                binding.etTask.textSize = textSize.textSize
             }
         }
     }
 
     override fun onInit(status: Int) {
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch {
             dialogsViewModel.preferences.collectLatest { preferences ->
-                if (status == TextToSpeech.SUCCESS) {
-                    val output = tts.setLanguage(Locale.getDefault())
-                    if (output == TextToSpeech.LANG_MISSING_DATA || output == TextToSpeech.LANG_NOT_SUPPORTED) {
-                        Log.i("yo", "Error con el idioma")
-                    } else {
-                        ttsManager.configTTS(preferences)
-                        withContext(Dispatchers.Main) {
-                            binding.apply {
-                                btnPlay.isEnabled = true
-                                btnPause.isEnabled = true
-                            }
-                        }
-                        observeIsplaying()
-                        dialogsViewModel.createSelectVoicesDialog(tts, requireContext())
-                    }
-                } else {
-                    Log.i("yo", "Error con el TTS")
+                handleTextToSpeechInitialization(status, preferences)
+            }
+        }
+    }
+
+    private suspend fun handleTextToSpeechInitialization(status: Int, preferences: AllPreferences) {
+        if (status == TextToSpeech.SUCCESS) {
+            val output = tts.setLanguage(Locale.getDefault())
+            if (output == TextToSpeech.LANG_MISSING_DATA || output == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.i("yo", "Error con el idioma")
+            } else {
+                ttsManager.configTTS(preferences)
+                updateUiForTTSInitialization()
+                observeIsPlaying()
+                dialogsViewModel.createSelectVoicesDialog(tts, requireContext())
+            }
+        } else {
+            Log.i("yo", "Error con el TTS")
+        }
+    }
+
+    private suspend fun updateUiForTTSInitialization() {
+        withContext(Dispatchers.Main) {
+            binding.btnPlay.isEnabled = true
+            binding.btnPause.isEnabled = true
+        }
+    }
+
+
+    private fun observeHightlight() {
+        lifecycleScope.launch(Dispatchers.Main) {
+            ttsManager.currentSentenceToHighlight.collect {
+                binding.etTask.apply {
+                    setSelection(it.start, it.start + it.sentence.length)
+                    requestFocus()
                 }
             }
         }
     }
 
-    private fun observeHightlight() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            ttsManager.currentSentenceToHighlight.collect {
-                withContext(Dispatchers.Main) {
-                    binding.etTask.apply {
-                        setSelection(it.start, it.start + it.sentence.length)
-                        requestFocus()
-                    }
-                }
-            }
-        }
-    }
 
     override fun onDestroy() {
         ttsManager.destroyTTS()

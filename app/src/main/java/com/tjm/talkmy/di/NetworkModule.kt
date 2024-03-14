@@ -1,8 +1,9 @@
 package com.tjm.talkmy.di
 
+import TasksOnlineRepositoryImp
+import android.content.Context
 import com.tjm.oroscapp.data.core.interceptors.AuthInterceptor
 import com.tjm.talkmy.data.network.TaskApiService
-import com.tjm.talkmy.data.repositoriesImp.TasksOnlineRepositoryImp
 import com.tjm.talkmy.domain.repositories.TasksOnlineRepository
 import dagger.Module
 import dagger.Provides
@@ -14,6 +15,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 import com.tjm.talkmy.BuildConfig.BASE_URL
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 
 @Module
@@ -48,7 +50,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRepository(apiService: TaskApiService): TasksOnlineRepository {
-        return TasksOnlineRepositoryImp(apiService)
+    fun provideRepository(@ApplicationContext context: Context, apiService: TaskApiService): TasksOnlineRepository {
+        return TasksOnlineRepositoryImp(context,apiService)
     }
 }

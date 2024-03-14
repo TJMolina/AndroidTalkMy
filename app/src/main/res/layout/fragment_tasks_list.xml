@@ -11,6 +11,7 @@
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:scaleType="fitCenter"
+        android:visibility="gone"
         android:src="@drawable/falta_nota_talkmy"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -23,16 +24,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/topAppBarTaskList"
-            style="@style/header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:menu="@menu/menu_taskslist"
             app:title="@string/app_title"
             app:titleTextAppearance="@style/title"
-            app:titleTextColor="@color/white" />
+            style="@style/header"
+            />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -42,7 +42,6 @@
         android:scrollbars="vertical"
         android:clipToPadding="false"
         android:paddingBottom="125dp"
-        android:paddingHorizontal="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
