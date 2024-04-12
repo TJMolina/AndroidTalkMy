@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import com.orhanobut.logger.Logger
 import com.tjm.talkmy.R
 import com.tjm.talkmy.databinding.FragmentEditTaskBinding
 import com.tjm.talkmy.domain.models.AllPreferences
@@ -184,12 +185,24 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
 
 
     private fun play() {
-        editTextManager.getSentences { sentences, indice ->
-            ttsManager.togglePlayback(sentences, indice)
+        editTextManager.modifiedVerify {
+            Logger.d(it)
+            if (it == "false") {
+                editTextManager.getSentences { sentences, indice ->
+                    reajustRangeSliderProgress(sentences.size.toFloat() - 1)
+                    ttsManager.togglePlayback(sentences, indice)
+                }
+            } else {
+                editTextManager.text { text ->
+                    editTextManager.setText(text) { sentences, indice ->
+                        reajustRangeSliderProgress(sentences.size.toFloat() - 1)
+                        ttsManager.togglePlayback(sentences, indice)
+                    }
+                }
+            }
         }
-        reajustRangeSliderProgress(ttsManager.sentences.size.toFloat() - 1)
-    }
 
+    }
 
     private fun reajustRangeSliderProgress(toValue: Float) {
         if (toValue > 0) {

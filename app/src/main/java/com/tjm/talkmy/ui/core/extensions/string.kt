@@ -3,7 +3,7 @@ package com.tjm.talkmy.ui.core.extensions
 import org.apache.commons.text.StringEscapeUtils
 
 fun String.separateSentences(): List<String> =
-    split(Regex("\\n|(?<=\\.)(?=[A-Z])"))
+    split(Regex("\\n|\\\\n|(?<=\\.)(?=[A-Z])"))
         .flatMap { it.split(Regex("(?<=\\.)(?=\\s+)")) }
         .filter { it.isNotBlank() }
 
@@ -26,7 +26,7 @@ fun String.translateHTMLtoPlain(): String =
         .mapNotNull { StringEscapeUtils.unescapeHtml4(it.value.cleanHtmlTags()) }
         .filter { it.trim().isNotBlank() }.joinToString("\n\n")
 fun String.translateInnerTextToPlain():String = this.removeSurrounding("\"", "\"")
-.replace(Regex("(?<!\\\\)\\\\n\\\\n(?![\\\\n])"), " ")
+.replace(Regex("(?<![\\\\n])\\\\n\\\\n(?![\\\\n])"), " ")
 .replace(Regex("(\\\\n){3,}"), "\n")
 fun String.isURL(): Boolean =
     matches(Regex("(http|https)://(www\\.)?[-a-zA-Z0-9@:%._\\+~#?&//=]{2,256}\\.[-a-zA-Z]{2,}(\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)?)"))

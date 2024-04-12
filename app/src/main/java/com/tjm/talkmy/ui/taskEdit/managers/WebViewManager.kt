@@ -13,15 +13,36 @@ class WebViewManager(private val myWebView: WebView) {
         myWebView.settings.javaScriptEnabled = true
     }
 
-    fun setText(text: String = "") {
-        var txt = text.separateSentencesInsertPTag()
+    fun modifiedVerify(then: (String)->Unit = {}){
         myWebView.evaluateJavascript(
             """
-                (function() { document.querySelector('.contenidoArchivo').innerHTML = `$txt`; })();
-            """.trimIndent(), null
-        )
+                (function() { 
+                  if(modified){
+                    modified = false;
+                    return true;
+                  }
+                  return false;
+                })();
+            """.trimIndent()
+        ) { then(it) }
     }
 
+    fun setText(text: String = "", then: ((List<String>, Int) -> Unit)? = null) {
+            var txt = text.translateInnerTextToPlain().separateSentencesInsertPTag()
+            myWebView.evaluateJavascript(
+                """
+                (function() { 
+                  document.querySelector('.contenidoArchivo').innerHTML = `$txt`;
+                })();
+            """.trimIndent()
+            ) {
+                if (then != null) {
+                    getSentences { sentences, indice ->
+                        then(sentences, indice)
+                    }
+                }
+            }
+    }
     fun text(function: (String) -> Unit) {
         myWebView.evaluateJavascript(
             """
@@ -33,7 +54,6 @@ class WebViewManager(private val myWebView: WebView) {
         }
     }
 
-
     var fontSize: Float by Delegates.observable(1f) { _, oldValue, newValue ->
         myWebView.evaluateJavascript(
             """
@@ -44,27 +64,24 @@ class WebViewManager(private val myWebView: WebView) {
 
     fun getSentences(function: (List<String>, Int) -> Unit) {
         myWebView.evaluateJavascript(
-            """ (function() { return document.querySelector('.contenidoArchivo').innerText;})();""".trimIndent()
+            """(function() { return document.querySelector('.contenidoArchivo').innerText;})();""".trimIndent()
         ) { allText ->
             myWebView.evaluateJavascript(
                 """
-                    (function() { 
-                        const pHighlited = document.querySelector(".parrafoEnfocadoRemarcado");
-                        const pArray = Array.from(document.querySelectorAll("p")); 
-                        let value = -1;
-                        if (pHighlited) {
-                            const arrayParrafos = Array.from(document.querySelectorAll("p"));
-                            const parrafoEspecifico = document.querySelector(".parrafoEnfocadoRemarcado");
-                            const indice = arrayParrafos.indexOf(parrafoEspecifico);
-                            value = indice;
-                        }
-                        return value;
-                    })()
+            (function() { 
+                const pHighlited = document.querySelector(".parrafoEnfocadoRemarcado");
+                let value = -1;
+                if (pHighlited) {
+                    const arrayParrafos = Array.from(document.querySelectorAll(".contenidoArchivo > *")).filter(p => p.innerText.trim() !== "");
+                    const indice = arrayParrafos.indexOf(pHighlited);
+                    value = indice;
+                }
+                return value !== null ? value : -1;
+            })()
             """.trimIndent()
             ) { indice ->
                 val sentences = allText.translateInnerTextToPlain().separateSentences()
                 function(sentences, indice.toInt())
-
             }
         }
     }
@@ -73,15 +90,19 @@ class WebViewManager(private val myWebView: WebView) {
     fun setSelection(selected: Int) {
         myWebView.evaluateJavascript(
             """
-                (function() {
-                    document.querySelector(".parrafoEnfocadoRemarcado")?.classList.remove("parrafoEnfocadoRemarcado");
-                    let pTags = Array.from(document.querySelectorAll("p"))
+            (function() {
+                document.querySelector(".parrafoEnfocadoRemarcado")?.classList.remove("parrafoEnfocadoRemarcado");
+                let pTags = Array.from(document.querySelectorAll(".contenidoArchivo > *")).filter(p => p.innerText.trim() !== "");
+                if(pTags[$selected].innerText.trim()!=""){
                     pTags[$selected].classList.add("parrafoEnfocadoRemarcado");
                     pTags[$selected].scrollIntoView({ behavior: "smooth", block: "center" });
-                 })();
-            """.trimIndent(), null
+                    pTags[$selected].click();
+                }
+             })();
+        """.trimIndent(), null
         )
     }
+
 
     fun setParagraphClickedListener() {
         myWebView.evaluateJavascript(
@@ -89,9 +110,16 @@ class WebViewManager(private val myWebView: WebView) {
             (function() {
                 document.querySelector(".contenidoArchivo").addEventListener('click', function(item) {
                     document.querySelector(".parrafoEnfocadoRemarcado")?.classList.remove("parrafoEnfocadoRemarcado");
-                    item.target.classList.add("parrafoEnfocadoRemarcado");
-                    item.target.scrollIntoView({ behavior: "smooth", block: "center" });   
+                    if(item.target != document.querySelector(".contenidoArchivo") && item.target.innerText.trim()!=""){
+                        item.target.classList.add("parrafoEnfocadoRemarcado");
+                        item.target.scrollIntoView({ behavior: "smooth", block: "center" });   
+                    }
                 });
+                
+                document.querySelector(".contenidoArchivo").addEventListener("input", function() {
+                  modified = true;
+                });
+                
             })();
         """.trimIndent(), null
         )
