@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+            body{
+                padding: 0px;
+                margin: 0px;
+                width: 100vw;
+                height: 100vh;
+            }
+            .textAreaContainer {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                box-sizing: border-box;
+                flex-direction: column;
+                flex: 1;
+            }
+
+              .contenidoArchivo {
+                padding: 0.3rem;
+                padding-bottom:130px;
+                font-size: 1rem;
+                box-sizing: border-box;
+                font-family: Arial, Helvetica, sans-serif;
+                flex: 1;
+              }
+              .contenidoArchivo *, .contenidoArchivo{
+                color: var(--fuente-letra-contrario);
+              }
+
+              .contenidoArchivo:empty::before {
+                content: "Escribe aquí...";
+                color: gray;
+              }
+
+            #contenido-archivo .parrafoEnfocadoRemarcado, #contenido-archivo .parrafoEnfocadoRemarcado *{
+              background-color: #59b4df;
+              color: white;
+            }
+            p{
+                display: inline !important;
+            }
+
+    </style>
+</head>
+<body>
+<div class="textAreaContainer">
+    <div id="contenido-archivo" class="contenidoArchivo" contenteditable="true" ></div>
+</div>
+</body>
+</html>

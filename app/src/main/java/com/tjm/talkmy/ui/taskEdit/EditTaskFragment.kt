@@ -1,7 +1,6 @@
 package com.tjm.talkmy.ui.taskEdit
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.util.Log
@@ -11,8 +10,8 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.view.MenuHost
@@ -28,6 +27,7 @@ import com.tjm.talkmy.domain.models.FunctionName
 import com.tjm.talkmy.domain.models.Task
 import com.tjm.talkmy.ui.core.states.SpeakingState
 import com.tjm.talkmy.ui.taskEdit.managers.TTSManager
+import com.tjm.talkmy.ui.taskEdit.managers.WebViewManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -45,6 +45,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private val editTaskViewModel by viewModels<EditTaskViewModel>()
     private lateinit var tts: TextToSpeech
     private lateinit var ttsManager: TTSManager
+    private lateinit var editTextManager: WebViewManager
     private val arg: EditTaskFragmentArgs by navArgs()
 
     override fun onCreateView(
@@ -62,14 +63,37 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     private fun initUI() {
-        reiveTask()
-        observeTextSize()
+        initComplements()
         initEvents()
+        initObservers()
+        initListeners()
+
+    }
+
+    private fun initComplements() {
+        initEditText()
         initTTS()
         initMenu()
-        initListeners()
+    }
+
+    private fun initObservers() {
+        observeTextSize()
         observeTextFromUrl()
         observeHightlight()
+    }
+
+    private fun initEditText() {
+        editTextManager = WebViewManager(binding.webView)
+        editTextManager.loadHTML()
+        binding.webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                reiveTask()
+                editTaskViewModel.executeFunction(FunctionName.ClickParagraph {
+                    editTextManager.setParagraphClickedListener()
+                })
+            }
+        }
     }
 
     private fun initMenu() {
@@ -121,17 +145,23 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private fun initTTS() {
         tts = TextToSpeech(requireContext(), this)
         ttsManager = TTSManager(tts, binding.rsTalkProgess)
-        ttsManager.reloadSentences(binding.etTask.text.toString())
+        editTextManager.getSentences { sentences, indice ->
+            ttsManager.reloadSentences(sentences)
+        }
         reajustRangeSliderProgress(ttsManager.sentences.size.toFloat())
     }
 
+
     private fun initEvents() {
         requireActivity().onBackPressedDispatcher.addCallback(this) {
-            editTaskViewModel.executeFunction(FunctionName.SaveTask(binding.etTask.text.toString()))
+            editTextManager.text {
+                editTaskViewModel.executeFunction(FunctionName.SaveTask(it))
+            }
             isEnabled = false
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
     }
+
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initListeners() {
@@ -150,20 +180,16 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                 }
             }
         }
-        editTaskViewModel.executeFunction(FunctionName.ClickParagraph {
-            binding.etTask.setOnClickListener {
-                ttsManager.findStartByAproxStart(
-                    binding.etTask.selectionStart,
-                    binding.etTask.text.toString()
-                )
-            }
-        })
     }
 
+
     private fun play() {
-        ttsManager.togglePlayback(binding.etTask.text.toString())
+        editTextManager.getSentences { sentences, indice ->
+            ttsManager.togglePlayback(sentences, indice)
+        }
         reajustRangeSliderProgress(ttsManager.sentences.size.toFloat() - 1)
     }
+
 
     private fun reajustRangeSliderProgress(toValue: Float) {
         if (toValue > 0) {
@@ -177,39 +203,50 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         } catch (e: Exception) {
             null
         }
-        //if isn't editing a note
         if (!taskToEdit.isNullOrEmpty()) {
-            insertTextIntoEditText(arg.task!!, binding.etTask, arg.fontSize)
-            lifecycleScope.launch(Dispatchers.IO) {
-                editTaskViewModel.executeFunction(
-                    FunctionName.GetTask(taskToEdit)
-                )
-            }
-
-            //if received  an url from mainactivity
+            //if isn't editing a note
+            addOverEditingTask(taskToEdit)
         } else {
-            val urlAux = url ?: arguments?.getString("url")
-            if (!urlAux.isNullOrEmpty()) {
-                lifecycleScope.launch(Dispatchers.IO) {
-                    dialogsViewModel.getTextFromUrl(urlAux)
-                }
+            //if received  an url from mainactivity
+            addTaskTextFromUrl(url)
+        }
+        //inicio observers en caso de entrar a la app desde una pagina web
+        initObservers()
+        //reajusto cosas relacionadas a las horaciones si está editando una nota
+        editTextManager.getSentences { sentences, indice ->
+            ttsManager.reloadSentences(sentences)
+            reajustRangeSliderProgress(sentences.size.toFloat() - 1)
+        }
+    }
+
+    private fun addTaskTextFromUrl(url: String?) {
+        val urlAux = url ?: arguments?.getString("url")
+        if (!urlAux.isNullOrEmpty()) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                dialogsViewModel.getTextFromUrl(urlAux)
             }
+        }
+    }
+
+    private fun addOverEditingTask(taskToEdit: String) {
+        insertTextIntoEditText(arg.task!!, arg.fontSize)
+        lifecycleScope.launch(Dispatchers.IO) {
+            editTaskViewModel.executeFunction(
+                FunctionName.GetTask(taskToEdit)
+            )
         }
     }
 
     private fun insertTextIntoEditText(
         text: String,
-        editText: EditText,
         fontSize: Float? = null
     ) {
         if (fontSize != null) {
-            editText.textSize = fontSize
+            editTextManager.fontSize = fontSize
         }
-        editText.setSelection(0)
-        requireActivity().runOnUiThread {
-            editText.setText(text)
-        }
+        editTextManager.setText(text)
     }
+
 
     private fun observeTextFromUrl() {
         lifecycleScope.launch(Dispatchers.IO) {
@@ -217,20 +254,21 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                 withContext(Dispatchers.Main) {
                     binding.apply {
                         if (value.isLoading) {
-                            editTaskViewModel.executeFunction(FunctionName.SaveTask(binding.etTask.text.toString()))
+                            editTextManager.text {
+                                editTaskViewModel.executeFunction(FunctionName.SaveTask(it))
+                            }
                             circularProgressBar.visibility =
                                 if (value.isLoading) View.VISIBLE else View.GONE
-                            etTask.isEnabled = value.error.isBlank()
+                            //etTask.isEnabled = value.error.isBlank()
                         } else {
                             circularProgressBar.visibility = View.GONE
-                            etTask.isEnabled = true
+                            //etTask.isEnabled = true
                             if (value.error.isBlank() && !dialogsViewModel.textGotFromUrl.isNullOrEmpty()) {
-                                insertTextIntoEditText(
-                                    dialogsViewModel.textGotFromUrl!!,
-                                    binding.etTask
-                                )
+                                insertTextIntoEditText(dialogsViewModel.textGotFromUrl!!)
                                 editTaskViewModel.taskBeingEditing = Task(nota = "")
-                                editTaskViewModel.executeFunction(FunctionName.SaveTask(binding.etTask.text.toString()))
+                                editTextManager.text {
+                                    editTaskViewModel.executeFunction(FunctionName.SaveTask(it))
+                                }
                             }
 
                         }
@@ -240,13 +278,13 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         }
     }
 
+
     @SuppressLint("ClickableViewAccessibility")
     private fun observeIsPlaying() {
         lifecycleScope.launch(Dispatchers.IO) {
             ttsManager._isPlaying.collect { value ->
                 if (value.isSpeaking) {
-                    binding.etTask.setOnTouchListener { v, event -> true }
-                    hideKeyboardAndSetUiState()
+                    updateUiForSpeakingState()
                 } else if (value.error.isNotBlank()) {
                     showErrorToast()
                 } else {
@@ -257,25 +295,13 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         }
     }
 
-    private suspend fun hideKeyboardAndSetUiState() {
+    private suspend fun updateUiForSpeakingState() {
         withContext(Dispatchers.Main) {
-            hideKeyboard()
-            updateUiForSpeakingState()
-        }
-    }
-
-    private fun hideKeyboard() {
-        val inputMethodManager =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputMethodManager.hideSoftInputFromWindow(binding.etTask.windowToken, 0)
-        binding.etTask.clearFocus()
-    }
-
-    private fun updateUiForSpeakingState() {
-        binding.apply {
-            btnPlay.visibility = View.INVISIBLE
-            btnPause.visibility = View.VISIBLE
-            rsTalkProgess.isEnabled = false
+            binding.apply {
+                btnPlay.visibility = View.INVISIBLE
+                btnPause.visibility = View.VISIBLE
+                rsTalkProgess.isEnabled = false
+            }
         }
     }
 
@@ -287,11 +313,11 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         ).show()
     }
 
+
     @SuppressLint("ClickableViewAccessibility")
     private suspend fun resetUiState() {
         withContext(Dispatchers.Main) {
             binding.apply {
-                etTask.setOnTouchListener(null)
                 btnPlay.visibility = View.VISIBLE
                 btnPause.visibility = View.INVISIBLE
                 rsTalkProgess.isEnabled = true
@@ -299,19 +325,22 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         }
     }
 
+
     private fun executeNextTaskIfFinalized(value: SpeakingState) {
         if (value.finalized && !value.isSpeaking) {
-            editTaskViewModel.executeFunction(FunctionName.ReadNextTask(binding.etTask) { play() })
+            editTaskViewModel.executeFunction(FunctionName.ReadNextTask(editTextManager) { play() })
         }
     }
 
+
     private fun observeTextSize() {
         lifecycleScope.launch {
-            dialogsViewModel.preferences.collect { textSize ->
-                binding.etTask.textSize = textSize.textSize
+            dialogsViewModel.preferences.collect { preferences ->
+                editTextManager.fontSize = preferences.textSize
             }
         }
     }
+
 
     override fun onInit(status: Int) {
         lifecycleScope.launch {
@@ -320,6 +349,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
             }
         }
     }
+
 
     private suspend fun handleTextToSpeechInitialization(status: Int, preferences: AllPreferences) {
         if (status == TextToSpeech.SUCCESS) {
@@ -337,6 +367,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         }
     }
 
+
     private suspend fun updateUiForTTSInitialization() {
         withContext(Dispatchers.Main) {
             binding.btnPlay.isEnabled = true
@@ -348,10 +379,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private fun observeHightlight() {
         lifecycleScope.launch(Dispatchers.Main) {
             ttsManager.currentSentenceToHighlight.collect {
-                binding.etTask.apply {
-                    setSelection(it.start, it.start + it.sentence.length)
-                    requestFocus()
-                }
+                editTextManager.setSelection(it)
             }
         }
     }

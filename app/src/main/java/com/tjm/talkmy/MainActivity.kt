@@ -1,7 +1,6 @@
 package com.tjm.talkmy
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -29,6 +28,7 @@ class MainActivity : AppCompatActivity() {
         initUtils()
     }
 
+
     private fun initUtils() {
         initToolbar()
         Logger.addLogAdapter(AndroidLogAdapter())
@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.top_app_bar, menu)
             }
+
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return true
             }
@@ -70,14 +71,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment, fragmentTag)
-                .addToBackStack(null)
+                .replace(R.id.fragmentContainerView, fragment, fragmentTag).addToBackStack(null)
                 .commit()
         }
         intent.replaceExtras(Bundle().apply {
             putString(
-                "nothig",
-                ""
+                "nothig", ""
             )
         })
     }

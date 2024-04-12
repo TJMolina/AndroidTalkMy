@@ -8,6 +8,6 @@ data class AllPreferences(
     val voice:String = "",
     val readNextTask:Boolean = false,
     val saveOnline:Boolean = false,
-    val clickParagraph:Boolean = true,
+    val clickParagraph:Boolean = false,
     val orderNote:Boolean = false
 )

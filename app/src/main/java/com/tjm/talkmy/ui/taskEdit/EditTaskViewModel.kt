@@ -1,6 +1,5 @@
 package com.tjm.talkmy.ui.taskEdit
 
-import android.widget.EditText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.orhanobut.logger.Logger
@@ -11,6 +10,7 @@ import com.tjm.talkmy.domain.models.Task
 import com.tjm.talkmy.domain.useCases.getTaskUseCase
 import com.tjm.talkmy.domain.useCases.getTasksUseCase
 import com.tjm.talkmy.domain.useCases.uploadTaskUseCasea
+import com.tjm.talkmy.ui.taskEdit.managers.WebViewManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -77,18 +77,20 @@ class EditTaskViewModel @Inject constructor(
         }
     }
 
-    private fun readNextsTaskFunction(editText: EditText, play: () -> Unit) {
+    private fun readNextsTaskFunction(editText: WebViewManager, play: () -> Unit) {
         if (currentTask < allTasks.size - 1) {
-            val nota = editText.text.toString()
-            if (nota != allTasks[currentTask].nota) {
-                executeFunction(FunctionName.SaveTask(nota) { increaseTask(editText, play) })
-            } else {
-                increaseTask(editText, play)
+            editText.text { nota ->
+                if (nota != allTasks[currentTask].nota) {
+                    executeFunction(FunctionName.SaveTask(nota) { increaseTask(editText, play) })
+                } else {
+                    increaseTask(editText, play)
+                }
+
             }
         }
     }
 
-    private fun increaseTask(editText: EditText, play: () -> Unit) {
+    private fun increaseTask(editText: WebViewManager, play: () -> Unit) {
         currentTask++
         taskBeingEditing = allTasks[currentTask]
         editText.setText(taskBeingEditing.nota)
@@ -119,6 +121,7 @@ class EditTaskViewModel @Inject constructor(
     }
 
     private fun saveTask(text: String) {
+        Logger.d(text)
         if (text.isEmpty()) return
         taskBeingEditing.nota = text
         CoroutineScope(Dispatchers.IO).launch { uploadTaskUseCasea(taskBeingEditing) }

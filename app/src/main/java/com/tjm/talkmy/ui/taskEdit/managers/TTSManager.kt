@@ -2,28 +2,14 @@ package com.tjm.talkmy.ui.taskEdit.managers
 
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.style.BackgroundColorSpan
 import android.util.Log
-import android.widget.EditText
-import android.widget.TextView
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.MutableLiveData
 import com.google.android.material.slider.Slider
-import com.orhanobut.logger.Logger
-import com.tjm.talkmy.R
 import com.tjm.talkmy.domain.interfaces.TTSManagerInterface
 import com.tjm.talkmy.domain.models.AllPreferences
-import com.tjm.talkmy.domain.models.Sentence
 import com.tjm.talkmy.ui.core.states.SpeakingState
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class TTSManager(
@@ -32,22 +18,23 @@ class TTSManager(
 ) :
     TTSManagerInterface {
     private var isPlaying = MutableStateFlow(SpeakingState())
-    val sentencesManager = SentencesManager()
     val _isPlaying: StateFlow<SpeakingState> = isPlaying
-    val currentSentenceToHighlight = MutableStateFlow(Sentence("",0))
-    var sentences: List<Sentence> = emptyList()
+    val currentSentenceToHighlight = MutableStateFlow(0)
+    var sentences: List<String> = emptyList()
     var currentSentenceIndex = 0
-    override fun togglePlayback(dirtySentences:String) {
+    override fun togglePlayback(listOfSentences: List<String>, indice: Int) {
         if (tts.isSpeaking) {
             pause()
         } else {
-            reloadSentences(dirtySentences)
-            if(currentSentenceIndex > sentences.size - 1) currentSentenceIndex = sentences.size - 1
+            reloadSentences(listOfSentences)
+            if(indice >= 0) currentSentenceIndex = indice
+            if (currentSentenceIndex > sentences.size - 1) currentSentenceIndex = sentences.size - 1
             speak()
         }
     }
-    fun reloadSentences(dirtySentences: String){
-            sentences = sentencesManager.getSentences(dirtySentences)
+
+    fun reloadSentences(listOfSentences: List<String>) {
+        sentences = listOfSentences
     }
 
     override fun speak() {
@@ -56,16 +43,17 @@ class TTSManager(
             val currentSentence = sentences[currentSentenceIndex]
             tts?.apply {
                 speak(
-                    currentSentence.sentence,
+                    currentSentence,
                     TextToSpeech.QUEUE_FLUSH,
                     null,
-                    currentSentence.sentence
+                    currentSentence
                 )
                 setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                     override fun onStart(utteranceId: String?) {
                         rangeSlider?.value = currentSentenceIndex.toFloat()
-                        currentSentenceToHighlight.value = currentSentence
+                        currentSentenceToHighlight.value = currentSentenceIndex
                     }
+
                     override fun onDone(utteranceId: String?) {
                         if (currentSentenceIndex == sentences.size - 1) {
                             currentSentenceIndex = 0
@@ -95,16 +83,16 @@ class TTSManager(
         return withContext(Dispatchers.Default) {
             if (!tts.isSpeaking && !sentences.isNullOrEmpty() && indice < sentences.size) {
                 currentSentenceIndex = indice
-                currentSentenceToHighlight.value = sentences[currentSentenceIndex]
+                currentSentenceToHighlight.value = indice
             }
         }
     }
 
     override fun findStartByAproxStart(start: Int, dirtySentences: String) {
         if (!isPlaying.value.isSpeaking) {
-            if (sentences.isNullOrEmpty()) reloadSentences(dirtySentences)
-            currentSentenceIndex = sentences.indexOfLast { it.start <= start }
-            if(currentSentenceIndex < 0) currentSentenceIndex = 0
+            //if (sentences.isNullOrEmpty()) reloadSentences(dirtySentences)
+            //currentSentenceIndex = sentences.indexOfLast { it.start <= start }
+            if (currentSentenceIndex < 0) currentSentenceIndex = 0
         }
     }
 

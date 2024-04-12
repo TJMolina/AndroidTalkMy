@@ -9,12 +9,14 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.orhanobut.logger.Logger
 import com.tjm.talkmy.R
 import com.tjm.talkmy.databinding.FragmentOptionsBinding
 import com.tjm.talkmy.domain.models.PreferencesType
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -38,10 +40,8 @@ class OptionsFragment : Fragment() {
     }
 
     private fun initUI() {
-        optionsViewModel.getAllPreferences()
         initConfigs()
         initSpinner()
-        initListeners()
     }
 
     private fun initSpinner() {
@@ -57,32 +57,33 @@ class OptionsFragment : Fragment() {
 
     private fun initConfigs() {
         lifecycleScope.launch(Dispatchers.IO) {
-            val preferences = optionsViewModel.preferences.first()
+            val preferences = optionsViewModel.getAllPreferences()
             withContext(Dispatchers.Main) {
                 binding.switchSaveOnline.isChecked = preferences.saveOnline
                 binding.switchReadNextTask.isChecked = preferences.readNextTask
                 binding.switchReadParagraph.isChecked = preferences.clickParagraph
                 binding.spinnerOrderNotes.setSelection(if (preferences.orderNote) 0 else 1)
+                initListeners()
             }
         }
     }
 
     private fun initListeners() {
-        binding.switchReadNextTask.setOnClickListener {
+        binding.switchReadNextTask.setOnCheckedChangeListener { buttonView, isChecked ->
             optionsViewModel.savePreference(
-                binding.switchReadNextTask.isChecked,
+                isChecked,
                 PreferencesType.NEXTTASK
             )
         }
-        binding.switchSaveOnline.setOnClickListener {
+        binding.switchSaveOnline.setOnCheckedChangeListener { buttonView, isChecked ->
             optionsViewModel.savePreference(
-                binding.switchSaveOnline.isChecked,
+                isChecked,
                 PreferencesType.SAVEONLINE
             )
         }
-        binding.switchReadParagraph.setOnClickListener {
+        binding.switchReadParagraph.setOnCheckedChangeListener { buttonView, isChecked ->
             optionsViewModel.savePreference(
-                binding.switchReadParagraph.isChecked,
+                isChecked,
                 PreferencesType.CLICKPARAGRAPH
             )
         }
