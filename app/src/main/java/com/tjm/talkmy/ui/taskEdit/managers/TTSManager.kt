@@ -19,7 +19,7 @@ class TTSManager(
     TTSManagerInterface {
     private var isPlaying = MutableStateFlow(SpeakingState())
     val _isPlaying: StateFlow<SpeakingState> = isPlaying
-    val currentSentenceToHighlight = MutableStateFlow(0)
+    val currentSentenceToHighlight = MutableStateFlow(-1)
     var sentences: List<String> = emptyList()
     var currentSentenceIndex = 0
     override fun togglePlayback(listOfSentences: List<String>, indice: Int) {
@@ -28,7 +28,7 @@ class TTSManager(
         } else {
             reloadSentences(listOfSentences)
             if(indice >= 0) currentSentenceIndex = indice
-            if (currentSentenceIndex > sentences.size - 1) currentSentenceIndex = sentences.size - 1
+            if (currentSentenceIndex > listOfSentences.size - 1) currentSentenceIndex = listOfSentences.size - 1
             speak()
         }
     }

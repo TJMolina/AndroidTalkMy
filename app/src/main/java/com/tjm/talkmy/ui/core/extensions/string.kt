@@ -25,8 +25,10 @@ fun String.translateHTMLtoPlain(): String =
     Regex("""<(p|li|h1|h2|h3|h4|h5|h6)\b[^<]*(?:(?!<\/\1>)<[^<]*)*<\/\1>""").findAll(this)
         .mapNotNull { StringEscapeUtils.unescapeHtml4(it.value.cleanHtmlTags()) }
         .filter { it.trim().isNotBlank() }.joinToString("\n\n")
-fun String.translateInnerTextToPlain():String = this.removeSurrounding("\"", "\"")
-.replace(Regex("(?<![\\\\n])\\\\n\\\\n(?![\\\\n])"), " ")
-.replace(Regex("(\\\\n){3,}"), "\n")
+
+fun String.translateInnerTextToPlain(): String = this.removeSurrounding("\"", "\"")
+    .replace(Regex("(?<![\\\\n])\\\\n\\\\n(?![\\\\n])"), " ")
+    .replace(Regex("(\\\\n)+"), "\n")
+
 fun String.isURL(): Boolean =
     matches(Regex("(http|https)://(www\\.)?[-a-zA-Z0-9@:%._\\+~#?&//=]{2,256}\\.[-a-zA-Z]{2,}(\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)?)"))

@@ -27,21 +27,15 @@ class WebViewManager(private val myWebView: WebView) {
         ) { then(it) }
     }
 
-    fun setText(text: String = "", then: ((List<String>, Int) -> Unit)? = null) {
+    fun setText(text: String = "") {
             var txt = text.translateInnerTextToPlain().separateSentencesInsertPTag()
             myWebView.evaluateJavascript(
                 """
                 (function() { 
                   document.querySelector('.contenidoArchivo').innerHTML = `$txt`;
                 })();
-            """.trimIndent()
-            ) {
-                if (then != null) {
-                    getSentences { sentences, indice ->
-                        then(sentences, indice)
-                    }
-                }
-            }
+            """.trimIndent(), null
+            )
     }
     fun text(function: (String) -> Unit) {
         myWebView.evaluateJavascript(
@@ -51,6 +45,29 @@ class WebViewManager(private val myWebView: WebView) {
         ) {
             val text = it.translateInnerTextToPlain()
             function(text)
+        }
+    }
+    fun reloadText(then: ((List<String>, Int) -> Unit)? = null) {
+        myWebView.evaluateJavascript(
+            """
+        (function() { 
+            let text = document.querySelector('.contenidoArchivo');
+            if (!text.innerHTML.match(/^<[^>]+>/)) {
+                document.querySelector('.contenidoArchivo').innerHTML = text.innerHTML.replace(/^[^<]+/, "<div>${'$'}&</div>");
+            }
+            text = Array.from(document.querySelectorAll(".contenidoArchivo > *")).filter(p => p.textContent.split('. ').length > 1);
+            text.map(p => {
+                let tag = p.tagName.toLowerCase();
+                p.innerHTML = p.innerHTML.split('. ').join("<"+tag+">"+"</"+tag+">");
+            });
+        })();
+        """.trimIndent()
+        ) {
+            if (then != null) {
+                getSentences { sentences, indice ->
+                    then(sentences, indice)
+                }
+            }
         }
     }
 
@@ -96,8 +113,8 @@ class WebViewManager(private val myWebView: WebView) {
                 if(pTags[$selected].innerText.trim()!=""){
                     pTags[$selected].classList.add("parrafoEnfocadoRemarcado");
                     pTags[$selected].scrollIntoView({ behavior: "smooth", block: "center" });
-                    pTags[$selected].click();
                 }
+                console.log(pTags[$selected].innerHTML);
              })();
         """.trimIndent(), null
         )

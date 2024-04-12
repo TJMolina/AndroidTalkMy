@@ -20,7 +20,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import com.orhanobut.logger.Logger
 import com.tjm.talkmy.R
 import com.tjm.talkmy.databinding.FragmentEditTaskBinding
 import com.tjm.talkmy.domain.models.AllPreferences
@@ -86,6 +85,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private fun initEditText() {
         editTextManager = WebViewManager(binding.webView)
         editTextManager.loadHTML()
+        binding.loadingText.visibility = View.VISIBLE
         binding.webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
@@ -93,6 +93,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                 editTaskViewModel.executeFunction(FunctionName.ClickParagraph {
                     editTextManager.setParagraphClickedListener()
                 })
+                binding.loadingText.visibility = View.GONE
             }
         }
     }
@@ -186,22 +187,18 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private fun play() {
         editTextManager.modifiedVerify {
-            Logger.d(it)
             if (it == "false") {
                 editTextManager.getSentences { sentences, indice ->
                     reajustRangeSliderProgress(sentences.size.toFloat() - 1)
                     ttsManager.togglePlayback(sentences, indice)
                 }
             } else {
-                editTextManager.text { text ->
-                    editTextManager.setText(text) { sentences, indice ->
-                        reajustRangeSliderProgress(sentences.size.toFloat() - 1)
-                        ttsManager.togglePlayback(sentences, indice)
-                    }
+                editTextManager.reloadText { sentences, indice ->
+                    reajustRangeSliderProgress(sentences.size.toFloat() - 1)
+                    ttsManager.togglePlayback(sentences, indice)
                 }
             }
         }
-
     }
 
     private fun reajustRangeSliderProgress(toValue: Float) {
@@ -392,7 +389,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private fun observeHightlight() {
         lifecycleScope.launch(Dispatchers.Main) {
             ttsManager.currentSentenceToHighlight.collect {
-                editTextManager.setSelection(it)
+                editTextManager.setSelection(if (it > 0) it else 0)
             }
         }
     }
