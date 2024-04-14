@@ -1,19 +1,24 @@
 package com.tjm.talkmy.ui.taskEdit.managers
 
+import android.content.Context
 import android.webkit.WebView
-import com.orhanobut.logger.Logger
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
+import com.tjm.talkmy.R
 import com.tjm.talkmy.ui.core.extensions.separateSentences
 import com.tjm.talkmy.ui.core.extensions.separateSentencesInsertPTag
 import com.tjm.talkmy.ui.core.extensions.translateInnerTextToPlain
 import kotlin.properties.Delegates
 
 class WebViewManager(private val myWebView: WebView) {
-    fun loadHTML() {
+    fun loadHTML(context: Context) {
+        myWebView.setBackgroundColor(ContextCompat.getColor(context, R.color.background))
         myWebView.loadUrl("file:///android_asset/edittext.html")
         myWebView.settings.javaScriptEnabled = true
+
     }
 
-    fun modifiedVerify(then: (String)->Unit = {}){
+    fun modifiedVerify(then: (String) -> Unit = {}) {
         myWebView.evaluateJavascript(
             """
                 (function() { 
@@ -28,15 +33,16 @@ class WebViewManager(private val myWebView: WebView) {
     }
 
     fun setText(text: String = "") {
-            var txt = text.translateInnerTextToPlain().separateSentencesInsertPTag()
-            myWebView.evaluateJavascript(
-                """
-                (function() { 
-                  document.querySelector('.contenidoArchivo').innerHTML = `$txt`;
-                })();
-            """.trimIndent(), null
-            )
+        var txt = text.translateInnerTextToPlain().separateSentencesInsertPTag()
+        myWebView.evaluateJavascript(
+            """
+                        (function() { 
+                          document.querySelector('.contenidoArchivo').innerHTML = `$txt`;
+                        })();
+                    """.trimIndent(), null
+        )
     }
+
     fun text(function: (String) -> Unit) {
         myWebView.evaluateJavascript(
             """
@@ -47,6 +53,7 @@ class WebViewManager(private val myWebView: WebView) {
             function(text)
         }
     }
+
     fun reloadText(then: ((List<String>, Int) -> Unit)? = null) {
         myWebView.evaluateJavascript(
             """
@@ -114,7 +121,6 @@ class WebViewManager(private val myWebView: WebView) {
                     pTags[$selected].classList.add("parrafoEnfocadoRemarcado");
                     pTags[$selected].scrollIntoView({ behavior: "smooth", block: "center" });
                 }
-                console.log(pTags[$selected].innerHTML);
              })();
         """.trimIndent(), null
         )

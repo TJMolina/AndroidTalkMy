@@ -25,54 +25,11 @@
             app:titleTextColor="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
-
-    <!--
-
-    <ScrollView
-        android:id="@+id/svEditText"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:alwaysDrawnWithCache="false"
-        android:animateLayoutChanges="false"
-        android:animationCache="false"
-        android:clickable="true"
-        android:fillViewport="true"
-        android:fitsSystemWindows="true"
-        android:scrollbarStyle="insideInset"
-        android:scrollbars="vertical"
-        android:soundEffectsEnabled="false"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/containerTopAppBar">
-
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <EditText
-                android:id="@+id/etTask"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@null"
-                android:gravity="top|start"
-                android:hint="@string/editTaskHint_ES"
-                android:importantForAutofill="no"
-                android:inputType="text|textWebEditText|textMultiLine|textLongMessage|textCapSentences|textAutoCorrect"
-                android:linksClickable="true"
-                android:paddingHorizontal="8dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="125dp"
-                android:textColor="@color/text" />
-        </androidx.appcompat.widget.LinearLayoutCompat>
-    </ScrollView>
--->
     <WebView
         android:id="@+id/webView"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:background="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -151,7 +108,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:indeterminate="true"
-        android:visibility="gone"
         app:indicatorColor="@color/primary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

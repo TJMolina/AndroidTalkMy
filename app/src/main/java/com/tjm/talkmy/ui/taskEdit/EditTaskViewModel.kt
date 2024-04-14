@@ -121,7 +121,6 @@ class EditTaskViewModel @Inject constructor(
     }
 
     private fun saveTask(text: String) {
-        Logger.d(text)
         if (text.isEmpty()) return
         taskBeingEditing.nota = text
         CoroutineScope(Dispatchers.IO).launch { uploadTaskUseCasea(taskBeingEditing) }

@@ -9,5 +9,6 @@ enum class PreferencesType {
     NEXTTASK,
     SAVEONLINE,
     CLICKPARAGRAPH,
-    ORDERNOTE
+    ORDERNOTE,
+    DARKMODEON
 }

@@ -19,6 +19,7 @@ import com.tjm.talkmy.databinding.FragmentTasksListBinding
 import com.tjm.talkmy.ui.tasks.adapter.TaskAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -56,7 +57,7 @@ class TasksListFragment : Fragment() {
 
     private fun observeHasTasks() {
         lifecycleScope.launch(Dispatchers.IO) {
-            tasksListViewModel.haveTaskState.collect {
+            tasksListViewModel.haveTaskState.collectLatest {
                 withContext(Dispatchers.Main) {
                     binding.ivNoTasks.apply {
                         visibility = if (it) View.GONE else View.VISIBLE

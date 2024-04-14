@@ -10,6 +10,7 @@
                 margin: 0px;
                 width: 100vw;
                 height: 100vh;
+                background-color: transparent;
             }
             .textAreaContainer {
                 width: 100%;
@@ -28,9 +29,6 @@
                 font-family: Arial, Helvetica, sans-serif;
                 flex: 1;
               }
-              .contenidoArchivo *, .contenidoArchivo{
-                color: var(--fuente-letra-contrario);
-              }
 
               .contenidoArchivo:empty::before {
                 content: "Escribe aquí...";
@@ -43,6 +41,10 @@
             }
             p{
                 display: inline !important;
+            }
+
+            .oscureMode *{
+                color: white;
             }
 
     </style>

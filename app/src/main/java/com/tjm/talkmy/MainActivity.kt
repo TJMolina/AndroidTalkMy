@@ -1,6 +1,7 @@
 package com.tjm.talkmy
 
 import android.content.Intent
+import android.content.res.Resources.Theme
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -8,26 +9,32 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.MenuProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import com.orhanobut.logger.AndroidLogAdapter
 import com.orhanobut.logger.Logger
+import com.tjm.talkmy.data.source.preferences.Preferences
 import com.tjm.talkmy.databinding.ActivityMainBinding
 import com.tjm.talkmy.ui.taskEdit.EditTaskFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         val screenSplash = installSplashScreen()
         screenSplash.setKeepOnScreenCondition { false }
-
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initUtils()
     }
-
 
     private fun initUtils() {
         initToolbar()

@@ -7,15 +7,16 @@ fun String.separateSentences(): List<String> =
         .flatMap { it.split(Regex("(?<=\\.)(?=\\s+)")) }
         .filter { it.isNotBlank() }
 
-fun String.separateSentencesInsertPTag(): String {
-    return this.split(Regex("\\n|(?<=\\.)(?=[A-Z])"))
+fun String.separateSentencesInsertPTag(): String =
+    this.replace(Regex("<"), "<</>")
+        .split(Regex("\\n|(?<=\\.)(?=[A-Z])"))
         .map { paragraph ->
-            paragraph.split(Regex("(?<=\\.)(?=\\s+)")).map { centence -> "<p>$centence</p>" }
-                .joinToString("")
+            paragraph.split(Regex("(?<=\\.)(?=\\s+)"))
+                .joinToString("") { "<p>${it.trim()}</p>" }
         }
         .filter { it.removeSurrounding("<p>", "</p>").trim().isNotBlank() }
         .joinToString("</br></br>")
-}
+
 
 fun String.cleanHtmlTags(): String =
     replace(Regex("""<[^>]+>"""), "")
@@ -29,6 +30,7 @@ fun String.translateHTMLtoPlain(): String =
 fun String.translateInnerTextToPlain(): String = this.removeSurrounding("\"", "\"")
     .replace(Regex("(?<![\\\\n])\\\\n\\\\n(?![\\\\n])"), " ")
     .replace(Regex("(\\\\n)+"), "\n")
+    .replace(Regex("(\\\\u003C)"),"<")
 
 fun String.isURL(): Boolean =
     matches(Regex("(http|https)://(www\\.)?[-a-zA-Z0-9@:%._\\+~#?&//=]{2,256}\\.[-a-zA-Z]{2,}(\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)?)"))

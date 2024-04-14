@@ -87,6 +87,12 @@ class OptionsFragment : Fragment() {
                 PreferencesType.CLICKPARAGRAPH
             )
         }
+        binding.switchDarkModeOn.setOnCheckedChangeListener { buttonView, isChecked ->
+            optionsViewModel.savePreference(
+                isChecked,
+                PreferencesType.DARKMODEON
+            )
+        }
         binding.spinnerOrderNotes.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(

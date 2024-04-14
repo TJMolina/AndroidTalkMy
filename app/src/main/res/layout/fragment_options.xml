@@ -23,6 +23,47 @@
             />
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- Theme -->
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp">
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="16dp"
+            android:src="@drawable/icon_dark_mode" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Modo oscuro."
+                android:textColor="@color/text"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Alternar entre modo oscuro y modo claro."
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchDarkModeOn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            app:thumbTint="@color/primary"
+            app:trackTint="@color/switch_cheked_uncheked" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
     <!-- Read Next Note -->
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"

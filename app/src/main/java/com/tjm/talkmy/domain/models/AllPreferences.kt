@@ -9,5 +9,6 @@ data class AllPreferences(
     val readNextTask:Boolean = false,
     val saveOnline:Boolean = false,
     val clickParagraph:Boolean = false,
-    val orderNote:Boolean = false
+    val orderNote:Boolean = false,
+    val darkModeOn: Boolean = false
 )

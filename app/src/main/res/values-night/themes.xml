@@ -6,21 +6,4 @@
         <item name="android:windowBackground">#202020</item>
     </style>
     <style name="Theme.TalkMy" parent="Base.Theme.TalkMy" />
-    <style name="largeButton">
-        <item name="android:backgroundTint">@color/primary</item>
-    </style>
-    <style name="circleButton">
-        <item name="android:backgroundTint">@color/primary</item>
-    </style>
-    <style name="header">
-        <item name="android:background">@color/primary</item>
-    </style>
-    <style name="labelColor" parent="Widget.MaterialComponents.Tooltip">
-        <item name="backgroundTint">@color/primary</item>
-    </style>
-    <style name="Theme.API_Splash_Screen" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/splahsColor</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_talkmy</item>
-        <item name="postSplashScreenTheme">@style/Base.Theme.TalkMy</item>
-    </style>
 </resources>

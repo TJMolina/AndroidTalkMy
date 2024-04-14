@@ -59,7 +59,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        initUI()
+        initEditText()
     }
 
     private fun initUI() {
@@ -71,7 +71,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     private fun initComplements() {
-        initEditText()
         initTTS()
         initMenu()
     }
@@ -84,16 +83,16 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private fun initEditText() {
         editTextManager = WebViewManager(binding.webView)
-        editTextManager.loadHTML()
-        binding.loadingText.visibility = View.VISIBLE
+        editTextManager.loadHTML(requireContext())
         binding.webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
+                binding.loadingText.visibility = View.GONE
                 reiveTask()
+                initUI()
                 editTaskViewModel.executeFunction(FunctionName.ClickParagraph {
                     editTextManager.setParagraphClickedListener()
                 })
-                binding.loadingText.visibility = View.GONE
             }
         }
     }
