@@ -12,7 +12,7 @@ fun String.separateSentencesInsertPTag(): String =
         .split(Regex("\\n|(?<=\\.)(?=[A-Z])"))
         .map { paragraph ->
             paragraph.split(Regex("(?<=\\.)(?=\\s+)"))
-                .joinToString("") { "<p>${it.trim()}</p>" }
+                .joinToString("") { "<p>${it}</p>" }
         }
         .filter { it.removeSurrounding("<p>", "</p>").trim().isNotBlank() }
         .joinToString("</br></br>")
@@ -28,8 +28,9 @@ fun String.translateHTMLtoPlain(): String =
         .filter { it.trim().isNotBlank() }.joinToString("\n\n")
 
 fun String.translateInnerTextToPlain(): String = this.removeSurrounding("\"", "\"")
-    .replace(Regex("(?<![\\\\n])\\\\n\\\\n(?![\\\\n])"), " ")
-    .replace(Regex("(\\\\n)+"), "\n")
+    .replace(Regex("(?<![\\\\n])\\\\n\\\\n(?![\\\\nA-Za-z])"), " ")
+    .replace(Regex("\\\\n\\\\n"), "\n")
+    .replace(Regex("\\\\n"), "\n")
     .replace(Regex("(\\\\u003C)"),"<")
 
 fun String.isURL(): Boolean =

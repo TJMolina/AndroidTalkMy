@@ -8,27 +8,17 @@
             body{
                 padding: 0px;
                 margin: 0px;
+            }
+            .contenidoArchivo {
+                box-sizing: border-box;
+                max-width: 100vw;
                 width: 100vw;
                 height: 100vh;
-                background-color: transparent;
-            }
-            .textAreaContainer {
-                width: 100%;
-                height: 100%;
-                display: flex;
-                box-sizing: border-box;
-                flex-direction: column;
-                flex: 1;
-            }
-
-              .contenidoArchivo {
                 padding: 0.3rem;
                 padding-bottom:130px;
-                font-size: 1rem;
-                box-sizing: border-box;
                 font-family: Arial, Helvetica, sans-serif;
-                flex: 1;
-              }
+                font-size: 1rem;
+            }
 
               .contenidoArchivo:empty::before {
                 content: "Escribe aquí...";
@@ -39,20 +29,19 @@
               background-color: #59b4df;
               color: white;
             }
+
             p{
-                display: inline !important;
+                display: inline;
+                margin: 0px;
             }
 
             .oscureMode *{
                 color: white;
             }
-
     </style>
 </head>
 <body>
-<div class="textAreaContainer">
     <div id="contenido-archivo" class="contenidoArchivo" contenteditable="true" ></div>
-</div>
 <script>
     var modified = false;
 </script>

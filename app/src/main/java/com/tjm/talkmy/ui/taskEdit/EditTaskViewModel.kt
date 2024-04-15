@@ -35,13 +35,12 @@ class EditTaskViewModel @Inject constructor(
     var allTasks: MutableList<Task> = emptyList<Task>().toMutableList()
     var currentTask = 0
 
-    fun getAllPreferences() {
-        viewModelScope.launch(Dispatchers.IO) {
+    fun getAllPreferences() = viewModelScope.launch(Dispatchers.IO) {
             preferencesRepository.getPreferences().collectLatest {
                 preferences.value = it
             }
         }
-    }
+
 
     fun executeFunction(function: FunctionName) {
         CoroutineScope(Dispatchers.IO).launch {

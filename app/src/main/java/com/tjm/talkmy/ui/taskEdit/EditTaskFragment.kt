@@ -1,6 +1,7 @@
 package com.tjm.talkmy.ui.taskEdit
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.util.Log
@@ -20,11 +21,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import com.orhanobut.logger.Logger
 import com.tjm.talkmy.R
 import com.tjm.talkmy.databinding.FragmentEditTaskBinding
 import com.tjm.talkmy.domain.models.AllPreferences
 import com.tjm.talkmy.domain.models.FunctionName
 import com.tjm.talkmy.domain.models.Task
+import com.tjm.talkmy.ui.audioNotifyManager.AudioNotifyManager
 import com.tjm.talkmy.ui.core.states.SpeakingState
 import com.tjm.talkmy.ui.taskEdit.managers.TTSManager
 import com.tjm.talkmy.ui.taskEdit.managers.WebViewManager
@@ -58,16 +61,29 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        initEditText()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = initEditText()
+    private fun initEditText() {
+        editTextManager = WebViewManager(binding.webView, requireContext())
+        editTextManager.loadHTML("file:///android_asset/edittext.html")
+        binding.webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                editTextManager.setFontColor()
+                binding.loadingText.visibility = View.GONE
+                reiveTask()
+                initUI()
+                editTaskViewModel.executeFunction(FunctionName.ClickParagraph {
+                    editTextManager.setParagraphClickedListener()
+                })
+            }
+        }
     }
 
     private fun initUI() {
         initComplements()
         initEvents()
-        initObservers()
         initListeners()
-
+        initObservers()
     }
 
     private fun initComplements() {
@@ -81,19 +97,30 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         observeHightlight()
     }
 
-    private fun initEditText() {
-        editTextManager = WebViewManager(binding.webView)
-        editTextManager.loadHTML(requireContext())
-        binding.webView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-                binding.loadingText.visibility = View.GONE
-                reiveTask()
-                initUI()
-                editTaskViewModel.executeFunction(FunctionName.ClickParagraph {
-                    editTextManager.setParagraphClickedListener()
-                })
-            }
+    fun reiveTask(url: String? = null) {
+        val taskToEdit = try {
+            arg.taskToEdit
+        } catch (e: Exception) {
+            null
+        }
+
+        if (!taskToEdit.isNullOrEmpty()) {
+            //if isn't editing a note
+            addOverEditingTask(taskToEdit)
+        } else {
+            //if received  an url from mainactivity
+            addTaskTextFromUrl(url)
+        }
+        //inicio observers en caso de entrar a la app desde una pagina web
+        initObservers()
+        //reajusto cosas relacionadas a las horaciones si está editando una nota
+        reajustSentenceValues()
+    }
+
+    private fun reajustSentenceValues() {
+        editTextManager.getSentences { sentences, indice ->
+            ttsManager.reloadSentences(sentences)
+            reajustRangeSliderProgress(sentences.size.toFloat() - 1)
         }
     }
 
@@ -163,7 +190,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         }
     }
 
-
     @SuppressLint("ClickableViewAccessibility")
     private fun initListeners() {
         binding.apply {
@@ -183,7 +209,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         }
     }
 
-
     private fun play() {
         editTextManager.modifiedVerify {
             if (it == "false") {
@@ -197,36 +222,12 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                     ttsManager.togglePlayback(sentences, indice)
                 }
             }
+
         }
     }
 
-    private fun reajustRangeSliderProgress(toValue: Float) {
-        if (toValue > 0) {
-            binding.rsTalkProgess.valueTo = toValue
-        }
-    }
-
-    fun reiveTask(url: String? = null) {
-        val taskToEdit = try {
-            arg.taskToEdit
-        } catch (e: Exception) {
-            null
-        }
-        if (!taskToEdit.isNullOrEmpty()) {
-            //if isn't editing a note
-            addOverEditingTask(taskToEdit)
-        } else {
-            //if received  an url from mainactivity
-            addTaskTextFromUrl(url)
-        }
-        //inicio observers en caso de entrar a la app desde una pagina web
-        initObservers()
-        //reajusto cosas relacionadas a las horaciones si está editando una nota
-        editTextManager.getSentences { sentences, indice ->
-            ttsManager.reloadSentences(sentences)
-            reajustRangeSliderProgress(sentences.size.toFloat() - 1)
-        }
-    }
+    private fun reajustRangeSliderProgress(toValue: Float) =
+        if (toValue > 0) binding.rsTalkProgess.valueTo = toValue else null
 
     private fun addTaskTextFromUrl(url: String?) {
         val urlAux = url ?: arguments?.getString("url")
@@ -246,13 +247,8 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         }
     }
 
-    private fun insertTextIntoEditText(
-        text: String,
-        fontSize: Float? = null
-    ) {
-        if (fontSize != null) {
-            editTextManager.fontSize = fontSize
-        }
+    private fun insertTextIntoEditText(text: String, fontSize: Float? = null) {
+        if (fontSize != null) editTextManager.fontSize = fontSize
         editTextManager.setText(text)
     }
 
@@ -294,19 +290,42 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
             ttsManager._isPlaying.collect { value ->
                 if (value.isSpeaking) {
                     updateUiForSpeakingState()
-                } else if (value.error.isNotBlank()) {
-                    showErrorToast()
+                    activeNotification()
                 } else {
-                    resetUiState()
+                    if (value.error.isNotBlank()) showErrorToast() else resetUiState()
+                    closeNotificationPlayer()
                 }
                 executeNextTaskIfFinalized(value)
             }
         }
     }
 
+    private fun activeNotification() {
+        try {
+            Intent(requireContext().applicationContext, AudioNotifyManager::class.java).also {
+                it.action = AudioNotifyManager.Actions.START.toString()
+                requireContext().startService(it)
+            }
+        } catch (e: Exception) {
+            Logger.e(e.toString())
+        }
+    }
+
+    private fun closeNotificationPlayer() {
+        try {
+            Intent(requireContext().applicationContext, AudioNotifyManager::class.java).also {
+                it.action = AudioNotifyManager.Actions.STOP.toString()
+                requireContext().startService(it)
+            }
+        } catch (e: Exception) {
+            Logger.e(e.toString())
+        }
+    }
+
     private suspend fun updateUiForSpeakingState() {
         withContext(Dispatchers.Main) {
             binding.apply {
+                editTextManager.editable = false
                 btnPlay.visibility = View.INVISIBLE
                 btnPause.visibility = View.VISIBLE
                 rsTalkProgess.isEnabled = false
@@ -327,6 +346,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private suspend fun resetUiState() {
         withContext(Dispatchers.Main) {
             binding.apply {
+                editTextManager.editable = true
                 btnPlay.visibility = View.VISIBLE
                 btnPause.visibility = View.INVISIBLE
                 rsTalkProgess.isEnabled = true
@@ -396,6 +416,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
 
     override fun onDestroy() {
         ttsManager.destroyTTS()
+        closeNotificationPlayer()
         super.onDestroy()
     }
 }

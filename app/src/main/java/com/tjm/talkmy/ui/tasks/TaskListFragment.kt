@@ -59,9 +59,7 @@ class TasksListFragment : Fragment() {
         lifecycleScope.launch(Dispatchers.IO) {
             tasksListViewModel.haveTaskState.collectLatest {
                 withContext(Dispatchers.Main) {
-                    binding.ivNoTasks.apply {
-                        visibility = if (it) View.GONE else View.VISIBLE
-                    }
+                    binding.ivNoTasks.visibility = if (it) View.GONE else View.VISIBLE
                 }
             }
         }

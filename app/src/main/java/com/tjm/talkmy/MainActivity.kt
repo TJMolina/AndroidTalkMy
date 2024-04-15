@@ -1,26 +1,21 @@
 package com.tjm.talkmy
 
+import android.Manifest
 import android.content.Intent
-import android.content.res.Resources.Theme
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.MenuProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import com.orhanobut.logger.AndroidLogAdapter
 import com.orhanobut.logger.Logger
-import com.tjm.talkmy.data.source.preferences.Preferences
 import com.tjm.talkmy.databinding.ActivityMainBinding
 import com.tjm.talkmy.ui.taskEdit.EditTaskFragment
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -54,6 +49,16 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private fun requestPermissions(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                0
+            )
+        }
+
+    }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)

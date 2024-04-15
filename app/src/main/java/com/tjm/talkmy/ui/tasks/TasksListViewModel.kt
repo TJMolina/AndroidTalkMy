@@ -33,7 +33,7 @@ class TasksListViewModel @Inject constructor(
     @SuppressLint("NotifyDataSetChanged")
     fun getLocalTasks(taskAdapter: TaskAdapter) {
         viewModelScope.launch(Dispatchers.IO) {
-            getTasksUseCase().collect { newTasks ->
+            getTasksUseCase().collectLatest { newTasks ->
                 if (newTasks.isNullOrEmpty()) {
                     withContext(Dispatchers.Main) {
                         Logger.d("ha ocurrido un error.")
