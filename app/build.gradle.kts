@@ -91,6 +91,9 @@ dependencies {
     //splash screen
     implementation("androidx.core:core-splashscreen:1.0.1")
 
+    implementation("androidx.media:media:1.7.0")
+
+
     //UnitTesting
     testImplementation("junit:junit:4.13.2")
     testImplementation ("io.kotlintest:kotlintest-runner-junit5:3.4.2")

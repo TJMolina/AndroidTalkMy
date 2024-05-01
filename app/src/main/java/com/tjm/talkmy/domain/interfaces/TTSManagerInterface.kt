@@ -5,7 +5,7 @@ import com.tjm.talkmy.domain.models.AllPreferences
 interface TTSManagerInterface {
     //fun togglePlayback(sentences: List<String>?, editText: EditText)
 
-    fun togglePlayback(listOfSentences: List<String>, indice: Int)
+    fun togglePlayback(listOfSentences: List<String>, indice: Int, play:Boolean)
 
 
     fun speak()

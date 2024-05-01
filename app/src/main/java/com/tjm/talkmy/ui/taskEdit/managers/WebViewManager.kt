@@ -2,13 +2,11 @@ package com.tjm.talkmy.ui.taskEdit.managers
 
 import android.content.Context
 import android.webkit.WebView
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import com.orhanobut.logger.Logger
 import com.tjm.talkmy.R
-import com.tjm.talkmy.ui.core.extensions.separateSentences
-import com.tjm.talkmy.ui.core.extensions.separateSentencesInsertPTag
-import com.tjm.talkmy.ui.core.extensions.translateInnerTextToPlain
+import com.tjm.talkmy.core.extensions.separateSentences
+import com.tjm.talkmy.core.extensions.translateInnerTextToPlain
 import kotlin.properties.Delegates
 
 class WebViewManager(private val myWebView: WebView, context: Context) {
@@ -25,7 +23,7 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
 
     fun modifiedVerify(then: (String) -> Unit = {}) = myWebView.evaluateJavascript(
             """
-                (function() { 
+                (function() {
                   if(modified){
                     modified = false;
                     return true;
@@ -37,10 +35,10 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
 
 
     fun setText(text: String = "") {
-        var txt = text.translateInnerTextToPlain().separateSentencesInsertPTag()
+        Logger.d(text)
         myWebView.evaluateJavascript(
             """
-                (function(){$editText.innerHTML = `$txt`;})();
+                (function(){$editText.innerHTML = `${text.replace("`","\\`")}`;})();
             """.trimIndent(), null
         )
     }
@@ -48,13 +46,27 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
     fun innerHTML(function: (String) -> Unit) = myWebView.evaluateJavascript(
         """(function() { return $editText.innerHTML; })();""".trimIndent()
     ) {
-        function(it.translateInnerTextToPlain())
+        function(it)
     }
 
     fun text(function: (String) -> Unit) = myWebView.evaluateJavascript(
-            """(function() { return $editText.innerText; })();""".trimIndent()
+        """(function() { 
+          const elementos = Array.from(document.querySelectorAll('.contenidoArchivo > *'));
+          return elementos.map(elemento => {
+            if (elemento.textContent.trim() !== "") {
+              if(elemento.tagName === 'DIV'){
+                return elemento.textContent.trim() + '\n';
+              }
+              else{
+                return elemento.textContent.trim();                    
+              }
+            } else {
+              return '\n';
+            }
+          }).join('');
+    })();""".trimIndent()
         ) {
-           function(it.translateInnerTextToPlain())
+        function(it.translateInnerTextToPlain().removeSurrounding("\"","\""))
     }
 
 
@@ -63,7 +75,7 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
             (function() { 
                     let text = $editText.innerHTML;
                     if (!text.match(/^<[^>]+>/)) {
-                        $editText.innerHTML = text.replace(/^[^<]+/, "<p>${'$'}&</p>");
+                        $editText.innerHTML = text.replace(/^[^<]+/, "<div>${'$'}&</div>");
                     }
                     text = Array.from(document.querySelectorAll(".contenidoArchivo > *")).filter(p => p.textContent.split('. ').length > 1);
                     text.map(p => {
@@ -79,6 +91,9 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
         """.trimIndent()
         ) {
             if (then != null) {
+                innerHTML {
+                    Logger.d(it)
+                }
                 getSentences { sentences, indice ->
                     then(sentences, indice)
                 }
@@ -96,13 +111,13 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
     var editable:Boolean by Delegates.observable(true) { _, oldValue, newValue ->
         myWebView.evaluateJavascript(
             """
-                (function() { $editText.contentEditable = $newValue;
+                (function() { $editText.contentEditable = $newValue;})();
             """.trimIndent(), null
         )
     }
     fun getSentences(function: (List<String>, Int) -> Unit) {
         myWebView.evaluateJavascript(
-            """(function() { return $editText.innerText;})();""".trimIndent()
+            """(function() { return $editText.innerText; })();""".trimIndent()
         ) { allText ->
             myWebView.evaluateJavascript(
                 """
@@ -115,10 +130,11 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
                             value = indice;
                         }
                         return value !== null ? value : -1;
-                    })()
+                    })();
                 """.trimIndent()
             ) { indice ->
-                val sentences = allText.translateInnerTextToPlain().separateSentences()
+                //val sentences = allText.translateInnerTextToPlain().separateSentences()
+                val sentences = allText.separateSentences()
                 function(sentences, indice.toInt())
             }
         }
@@ -149,7 +165,6 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
                         $parrafoEnmarcado?.classList.remove("parrafoEnfocadoRemarcado");
                         if(item.target != document.querySelector(".contenidoArchivo") && item.target.innerText.trim()!=""){
                             item.target.classList.add("parrafoEnfocadoRemarcado");
-                            item.target.scrollIntoView({ behavior: "smooth", block: "center" });   
                         }
                     });
                     

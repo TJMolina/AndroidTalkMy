@@ -4,6 +4,7 @@ import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import com.google.android.material.slider.Slider
+import com.orhanobut.logger.Logger
 import com.tjm.talkmy.domain.interfaces.TTSManagerInterface
 import com.tjm.talkmy.domain.models.AllPreferences
 import com.tjm.talkmy.ui.core.states.SpeakingState
@@ -22,14 +23,15 @@ class TTSManager(
     val currentSentenceToHighlight = MutableStateFlow(-1)
     var sentences: List<String> = emptyList()
     var currentSentenceIndex = 0
-    override fun togglePlayback(listOfSentences: List<String>, indice: Int) {
-        if (tts.isSpeaking) {
-            pause()
-        } else {
+    override fun togglePlayback(listOfSentences: List<String>, indice: Int, play:Boolean) {
+        if(play && !tts.isSpeaking){
             reloadSentences(listOfSentences)
             if(indice >= 0) currentSentenceIndex = indice
             if (currentSentenceIndex > listOfSentences.size - 1) currentSentenceIndex = listOfSentences.size - 1
             speak()
+        }
+        else if(!play && tts.isSpeaking){
+            pause()
         }
     }
 

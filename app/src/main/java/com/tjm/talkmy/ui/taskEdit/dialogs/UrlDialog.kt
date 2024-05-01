@@ -5,9 +5,8 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import com.orhanobut.logger.Logger
 import com.tjm.talkmy.databinding.DialogInsertUrlBinding
-import com.tjm.talkmy.ui.core.extensions.isURL
+import com.tjm.talkmy.core.extensions.isURL
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
