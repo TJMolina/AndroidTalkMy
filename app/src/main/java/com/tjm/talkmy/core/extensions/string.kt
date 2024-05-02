@@ -1,23 +1,24 @@
 package com.tjm.talkmy.core.extensions
+import com.orhanobut.logger.Logger
 import org.apache.commons.text.StringEscapeUtils
 
 fun String.separateSentences(): List<String> =
-    split(Regex("\\n|\\\\n"))
+    this.split(Regex("\\n|\\\\n"))
         .flatMap { it.split(Regex("(?<=\\.)(?=\\s+)")) }
         .filter { it.isNotBlank() }
 
 fun String.separateSentencesInsertPTag(): String {
+    Logger.d(this)
     val text = this.replace(Regex("<"), "&lt").split(Regex("\\n"))
     return text.joinToString("") { paragraph ->
         if (paragraph.trim().isNotBlank()) {
              paragraph.split(Regex("(?<=\\.)(?=\\s+)"))
-                .joinToString("") { "<p>${it}</p>" } + "</br>"
+                .joinToString("") { "<p>${it} </p>" } + "</br>"
         } else {
             "</br>"
         }
     }
 }
-
 
 fun String.separateSentencesInsertPTagWeb(): String =
     this.replace(Regex("<"), "<</>")

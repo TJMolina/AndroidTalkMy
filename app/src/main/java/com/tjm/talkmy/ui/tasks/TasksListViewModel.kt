@@ -32,12 +32,9 @@ class TasksListViewModel @Inject constructor(
 
     @SuppressLint("NotifyDataSetChanged")
     fun getLocalTasks(taskAdapter: TaskAdapter) {
-        viewModelScope.launch(Dispatchers.IO) {
-            getTasksUseCase().collectLatest { newTasks ->
+        viewModelScope.launch(Dispatchers.Default) {
+            getTasksUseCase().collect { newTasks ->
                 if (newTasks.isNullOrEmpty()) {
-                    withContext(Dispatchers.Main) {
-                        Logger.d("ha ocurrido un error.")
-                    }
                     haveTaskState.value = false
                 } else {
                     haveTaskState.value = true
@@ -82,8 +79,7 @@ class TasksListViewModel @Inject constructor(
         parentFragmentManager: FragmentManager
     ) {
         deleteTaskDialog.delete = {
-            taskAdapter.taskList.removeAt(position)
-            taskAdapter.notifyItemRemoved(position)
+            taskAdapter.delete(position)
             viewModelScope.launch(Dispatchers.IO) {
                 deleteTaskUseCase(id)
             }

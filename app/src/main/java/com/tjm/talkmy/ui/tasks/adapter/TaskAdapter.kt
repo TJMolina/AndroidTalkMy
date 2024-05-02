@@ -21,4 +21,8 @@ class TaskAdapter(
         val item = taskList[position]
         holder.render(item, editTask, deleteTask)
     }
+    fun delete(position: Int){
+        taskList.removeAt(position)
+        notifyItemRemoved(position)
+    }
 }

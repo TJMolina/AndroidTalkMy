@@ -35,7 +35,6 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
 
 
     fun setText(text: String = "") {
-        Logger.d(text)
         myWebView.evaluateJavascript(
             """
                 (function(){$editText.innerHTML = `${text.replace("`","\\`")}`;})();
@@ -55,10 +54,10 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
           return elementos.map(elemento => {
             if (elemento.textContent.trim() !== "") {
               if(elemento.tagName === 'DIV'){
-                return elemento.textContent.trim() + '\n';
+                return elemento.textContent + '\n';
               }
               else{
-                return elemento.textContent.trim();                    
+                return elemento.textContent;                    
               }
             } else {
               return '\n';
@@ -66,6 +65,8 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
           }).join('');
     })();""".trimIndent()
         ) {
+        innerHTML { Logger.d(it) }
+        Logger.d(it)
         function(it.translateInnerTextToPlain().removeSurrounding("\"","\""))
     }
 
@@ -79,7 +80,7 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
                     }
                     text = Array.from(document.querySelectorAll(".contenidoArchivo > *")).filter(p => p.textContent.split('. ').length > 1);
                     text.map(p => {
-                        const oraciones = p.innerText.split(/(?<=\.)(?=\s)/);
+                        const oraciones = p.innerText.split(/(?<=\.)(?=\s)/g);
                         oraciones.reverse().forEach(oracion => {
                             const nuevoParrafo = document.createElement('p');
                             nuevoParrafo.textContent = oracion;
