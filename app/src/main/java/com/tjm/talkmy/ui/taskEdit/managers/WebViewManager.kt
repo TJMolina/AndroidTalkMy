@@ -65,8 +65,6 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
           }).join('');
     })();""".trimIndent()
         ) {
-        innerHTML { Logger.d(it) }
-        Logger.d(it)
         function(it.translateInnerTextToPlain().removeSurrounding("\"","\""))
     }
 
@@ -92,9 +90,6 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
         """.trimIndent()
         ) {
             if (then != null) {
-                innerHTML {
-                    Logger.d(it)
-                }
                 getSentences { sentences, indice ->
                     then(sentences, indice)
                 }
@@ -134,8 +129,7 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
                     })();
                 """.trimIndent()
             ) { indice ->
-                //val sentences = allText.translateInnerTextToPlain().separateSentences()
-                val sentences = allText.separateSentences()
+                val sentences = allText.removeSurrounding("\"","\"").separateSentences()
                 function(sentences, indice.toInt())
             }
         }
@@ -168,7 +162,14 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
                             item.target.classList.add("parrafoEnfocadoRemarcado");
                         }
                     });
-                    
+                })();
+            """.trimIndent(), null
+        )
+    }
+    fun initExtraListeners(){
+        myWebView.evaluateJavascript(
+            """
+                (function() {
                     document.querySelector(".contenidoArchivo").addEventListener("input", function() {
                       modified = true;
                       $parrafoEnmarcado?.classList.remove("parrafoEnfocadoRemarcado");

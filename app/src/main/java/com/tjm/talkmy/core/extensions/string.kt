@@ -8,12 +8,11 @@ fun String.separateSentences(): List<String> =
         .filter { it.isNotBlank() }
 
 fun String.separateSentencesInsertPTag(): String {
-    Logger.d(this)
     val text = this.replace(Regex("<"), "&lt").split(Regex("\\n"))
     return text.joinToString("") { paragraph ->
         if (paragraph.trim().isNotBlank()) {
              paragraph.split(Regex("(?<=\\.)(?=\\s+)"))
-                .joinToString("") { "<p>${it} </p>" } + "</br>"
+                .joinToString("") { "<p>${it}</p>" } + "</br>"
         } else {
             "</br>"
         }

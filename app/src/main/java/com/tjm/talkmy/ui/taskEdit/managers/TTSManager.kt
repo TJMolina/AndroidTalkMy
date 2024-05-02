@@ -23,16 +23,21 @@ class TTSManager(
     val currentSentenceToHighlight = MutableStateFlow(-1)
     var sentences: List<String> = emptyList()
     var currentSentenceIndex = 0
-    override fun togglePlayback(listOfSentences: List<String>, indice: Int, play:Boolean) {
-        if(play && !tts.isSpeaking){
-            reloadSentences(listOfSentences)
-            if(indice >= 0) currentSentenceIndex = indice
-            if (currentSentenceIndex > listOfSentences.size - 1) currentSentenceIndex = listOfSentences.size - 1
-            speak()
-        }
-        else if(!play && tts.isSpeaking){
-            pause()
-        }
+    var changinParagraphWithControls = false
+    override fun togglePlayback(
+        listOfSentences: List<String>?,
+        indice: Int?,
+        play: Boolean?
+    ) {
+            if (play!! && !tts.isSpeaking) {
+                reloadSentences(listOfSentences!!)
+                if (indice!! >= 0) currentSentenceIndex = indice
+                if (currentSentenceIndex > listOfSentences.size - 1) currentSentenceIndex =
+                    listOfSentences.size - 1
+                speak()
+            } else if (!play && tts.isSpeaking) {
+                pause()
+            }
     }
 
     fun reloadSentences(listOfSentences: List<String>) {
@@ -83,17 +88,17 @@ class TTSManager(
 
     suspend fun findStartByIndice(indice: Int) {
         return withContext(Dispatchers.Default) {
-            if (!tts.isSpeaking && !sentences.isNullOrEmpty() && indice < sentences.size) {
+            if ((!isPlaying.value.isSpeaking && !sentences.isNullOrEmpty() && indice < sentences.size) || changinParagraphWithControls) {
                 currentSentenceIndex = indice
                 currentSentenceToHighlight.value = indice
+                if(changinParagraphWithControls && tts.isSpeaking) speak()
+                changinParagraphWithControls = false
             }
         }
     }
 
     override fun findStartByAproxStart(start: Int, dirtySentences: String) {
         if (!isPlaying.value.isSpeaking) {
-            //if (sentences.isNullOrEmpty()) reloadSentences(dirtySentences)
-            //currentSentenceIndex = sentences.indexOfLast { it.start <= start }
             if (currentSentenceIndex < 0) currentSentenceIndex = 0
         }
     }

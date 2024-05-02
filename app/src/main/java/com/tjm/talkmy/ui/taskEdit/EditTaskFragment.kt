@@ -61,6 +61,8 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
             when (intent?.action) {
                 IntentActions.PLAY -> play(true)
                 IntentActions.PAUSE -> play(false)
+                IntentActions.NEXT -> next()
+                IntentActions.PREV -> previus()
             }
         }
     }
@@ -68,13 +70,11 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     object IntentActions {
         const val PLAY = "PLAY"
         const val PAUSE = "PAUSE"
+        const val NEXT = "NEXT"
+        const val PREV = "PREV"
     }
 
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         editTaskViewModel.getAllPreferences()
         dialogsViewModel.getAllPreferences()
         _binding = FragmentEditTaskBinding.inflate(inflater, container, false)
@@ -86,10 +86,13 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         registerReceiver(requireContext(), receiver, IntentFilter().apply {
             addAction(IntentActions.PLAY)
             addAction(IntentActions.PAUSE)
+            addAction(IntentActions.NEXT)
+            addAction(IntentActions.PREV)
         }, RECEIVER_EXPORTED)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = initEditText()
+
     private fun initEditText() {
         editTextManager = WebViewManager(binding.webView, requireContext())
         editTextManager.loadHTML("file:///android_asset/edittext.html")
@@ -101,6 +104,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                 reiveTask()
                 initUI()
                 editTaskViewModel.executeFunction(FunctionName.ClickParagraph { editTextManager.setParagraphClickedListener() })
+                editTextManager.initExtraListeners()
             }
         }
     }
@@ -117,7 +121,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         initMenu()
     }
 
-
     private fun initObservers() {
         observeTextSize()
         observeTextFromUrl()
@@ -133,31 +136,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
             }
         } catch (e: Exception) {
             Logger.e(e.toString())
-        }
-    }
-
-    fun reiveTask(url: String? = null) {
-        val taskToEdit = try {
-            arg.taskToEdit
-        } catch (e: Exception) {
-            null
-        }
-
-        if (!taskToEdit.isNullOrEmpty()) {
-            //if isn't editing a note
-            addOverEditingTask(taskToEdit)
-        } else {
-            //if received  an url from mainactivity
-            addTaskTextFromUrl(url)
-        }
-        //reajusto cosas relacionadas a las horaciones si está editando una nota
-        reajustSentenceValues()
-    }
-
-    private fun reajustSentenceValues() {
-        editTextManager.getSentences { sentences, indice ->
-            ttsManager.reloadSentences(sentences)
-            reajustRangeSliderProgress(sentences.size.toFloat() - 1)
         }
     }
 
@@ -240,23 +218,48 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         }
         requireActivity().onBackPressedDispatcher.addCallback(this) {
             editTextManager.modifiedVerify {verify->
-                    if (verify == "false") {
+                if (verify == "false") {
+                    editTextManager.text { text ->
+                        editTaskViewModel.executeFunction(FunctionName.SaveTask(text))
+                        isEnabled = false
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    }
+                } else {
+                    editTextManager.reloadText { sentences, indice ->
                         editTextManager.text { text ->
                             editTaskViewModel.executeFunction(FunctionName.SaveTask(text))
                             isEnabled = false
                             requireActivity().onBackPressedDispatcher.onBackPressed()
                         }
-                    } else {
-                        editTextManager.reloadText { sentences, indice ->
-                            editTextManager.text { text ->
-                                editTaskViewModel.executeFunction(FunctionName.SaveTask(text))
-                                isEnabled = false
-                                requireActivity().onBackPressedDispatcher.onBackPressed()
-                            }
-                        }
                     }
+                }
             }
 
+        }
+    }
+
+    fun reiveTask(url: String? = null) {
+        val taskToEdit = try {
+            arg.taskToEdit
+        } catch (e: Exception) {
+            null
+        }
+
+        if (!taskToEdit.isNullOrEmpty()) {
+            //if isn't editing a note
+            addOverEditingTask(taskToEdit)
+        } else {
+            //if received  an url from mainactivity
+            addTaskTextFromUrl(url)
+        }
+        //reajusto cosas relacionadas a las horaciones si está editando una nota
+        reajustSentenceValues()
+    }
+
+    private fun reajustSentenceValues() {
+        editTextManager.getSentences { sentences, indice ->
+            ttsManager.reloadSentences(sentences)
+            reajustRangeSliderProgress(sentences.size.toFloat() - 1)
         }
     }
 
@@ -264,20 +267,33 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         editTextManager.modifiedVerify {
             if (it == "false") {
                 editTextManager.getSentences { sentences, indice ->
-                    reajustRangeSliderProgress(sentences.size.toFloat() - 1)
+                    reajustRangeSliderProgress(sentences.size.toFloat() - 1, indice.toFloat())
                     ttsManager.togglePlayback(sentences, indice, play)
                 }
             } else {
                 editTextManager.reloadText { sentences, indice ->
-                    reajustRangeSliderProgress(sentences.size.toFloat() - 1)
+                    reajustRangeSliderProgress(sentences.size.toFloat() - 1, indice.toFloat())
                     ttsManager.togglePlayback(sentences, indice, play)
                 }
             }
         }
     }
 
-    private fun reajustRangeSliderProgress(toValue: Float) =
+    private fun next(){
+        ttsManager.changinParagraphWithControls = true
+        val slider = binding.rsTalkProgess
+        slider.value = if(slider.value < slider.valueTo) slider.value + 1f else slider.valueTo
+    }
+    private fun previus(){
+        ttsManager.changinParagraphWithControls = true
+        val slider = binding.rsTalkProgess
+        slider.value = if(slider.value > slider.valueFrom) slider.value - 1f else slider.valueFrom
+    }
+
+    private fun reajustRangeSliderProgress(toValue: Float, start:Float = 0f){
+         binding.rsTalkProgess.value = if (start > 0f) start else 0f
         if (toValue > 0) binding.rsTalkProgess.valueTo = toValue else null
+    }
 
     private fun addTaskTextFromUrl(url: String?) {
         val urlAux = url ?: arguments?.getString("url")
@@ -288,6 +304,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private fun addOverEditingTask(taskToEdit: String) {
         insertTextIntoEditText(arg.task!!, arg.fontSize)
+        arguments?.clear()//TODO MEDIDA TEMPORAL, PUEDE CAUSAR ALGUN ERROR
         lifecycleScope.launch(Dispatchers.IO) {
             editTaskViewModel.executeFunction(
                 FunctionName.GetTask(taskToEdit)
@@ -299,7 +316,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         if (fontSize != null) editTextManager.fontSize = fontSize
         editTextManager.setText(text.separateSentencesInsertPTag())
     }
-
 
     private fun observeTextFromUrl() {
         lifecycleScope.launch(Dispatchers.IO) {
@@ -329,7 +345,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         }
     }
 
-
     private fun observeIsPlaying() {
         lifecycleScope.launch(Dispatchers.IO) {
             ttsManager._isPlaying.collect { value ->
@@ -337,6 +352,16 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                     updateUiForSpeakingState()
                 } else if (value.error.isNotBlank()) showErrorToast() else resetUiState()
                 executeNextTaskIfFinalized(value)
+            }
+        }
+    }
+
+    private fun observeTextSize() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            dialogsViewModel.preferences.collect { preferences ->
+                withContext(Dispatchers.Main) {
+                    editTextManager.fontSize = preferences.textSize
+                }
             }
         }
     }
@@ -396,24 +421,10 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private fun executeNextTaskIfFinalized(value: SpeakingState) {
         if (value.finalized && !value.isSpeaking) {
             editTaskViewModel.executeFunction(FunctionName.ReadNextTask(editTextManager) {
-                play(
-                    false
-                )
+                play(true)
             })
         }
     }
-
-
-    private fun observeTextSize() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            dialogsViewModel.preferences.collect { preferences ->
-                withContext(Dispatchers.Main) {
-                    editTextManager.fontSize = preferences.textSize
-                }
-            }
-        }
-    }
-
 
     override fun onInit(status: Int) {
         lifecycleScope.launch {
@@ -422,7 +433,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
             }
         }
     }
-
 
     private suspend fun handleTextToSpeechInitialization(status: Int, preferences: AllPreferences) {
         if (status == TextToSpeech.SUCCESS) {
@@ -454,7 +464,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
             }
         }
     }
-
 
     override fun onDestroy() {
         ttsManager.destroyTTS()

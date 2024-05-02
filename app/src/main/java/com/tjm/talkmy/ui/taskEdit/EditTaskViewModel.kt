@@ -3,6 +3,7 @@ package com.tjm.talkmy.ui.taskEdit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.orhanobut.logger.Logger
+import com.tjm.talkmy.core.extensions.separateSentencesInsertPTag
 import com.tjm.talkmy.data.source.preferences.Preferences
 import com.tjm.talkmy.domain.models.AllPreferences
 import com.tjm.talkmy.domain.models.FunctionName
@@ -92,7 +93,7 @@ class EditTaskViewModel @Inject constructor(
     private fun increaseTask(editText: WebViewManager, play: () -> Unit) {
         currentTask++
         taskBeingEditing = allTasks[currentTask]
-        editText.setText(taskBeingEditing.nota)
+        editText.setText(taskBeingEditing.nota.separateSentencesInsertPTag())
         play()
     }
 

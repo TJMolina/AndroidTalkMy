@@ -16,13 +16,15 @@ import androidx.media.session.MediaButtonReceiver
 import com.orhanobut.logger.Logger
 import com.tjm.talkmy.MainActivity
 import com.tjm.talkmy.R
+import com.tjm.talkmy.ui.taskEdit.EditTaskFragment
 
 class MediaPlayerNotification() : Service() {
     private val channelId = "media_player_channel"
     private val notificationId = 1
     private lateinit var mediaSession: MediaSessionCompat
 
-    fun togglePlayPause(play:Boolean = true) = sendBroadcast(Intent(if(play) "PLAY" else "PAUSE"))
+    fun togglePlayPause(play:Boolean = true) = sendBroadcast(Intent(if(play) EditTaskFragment.IntentActions.PLAY else EditTaskFragment.IntentActions.PAUSE))
+    fun changeNextPrev(next:Boolean) = sendBroadcast(Intent(if(next) EditTaskFragment.IntentActions.NEXT else EditTaskFragment.IntentActions.PREV))
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -77,6 +79,16 @@ class MediaPlayerNotification() : Service() {
                     super.onPause()
                     updatePlaybackState(false)
                 }
+
+                override fun onSkipToNext() {
+                    super.onSkipToNext()
+                    changeNextPrev(true)
+                }
+
+                override fun onSkipToPrevious() {
+                    super.onSkipToPrevious()
+                    changeNextPrev(false)
+                }
             })
             isActive = true
         }
@@ -104,7 +116,13 @@ class MediaPlayerNotification() : Service() {
 
     private fun buildNotification(pendingIntent: PendingIntent): Notification {
         val pauseAction = NotificationCompat.Action.Builder(
-            R.drawable.ic_pause, "Pause", PendingIntent.getBroadcast(this, 0, Intent("PAUSE"), PendingIntent.FLAG_IMMUTABLE)
+            R.drawable.ic_play_notify, "Pause", PendingIntent.getBroadcast(this, 0, Intent("PAUSE"), PendingIntent.FLAG_IMMUTABLE)
+        ).build()
+        val nextAction = NotificationCompat.Action.Builder(
+            R.drawable.ic_next, "Next", PendingIntent.getBroadcast(this, 0, Intent("NEXT"), PendingIntent.FLAG_IMMUTABLE)
+        ).build()
+        val prevAction = NotificationCompat.Action.Builder(
+            R.drawable.ic_rewind, "Prev", PendingIntent.getBroadcast(this, 0, Intent("PREV"), PendingIntent.FLAG_IMMUTABLE)
         ).build()
         return NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_listen)
@@ -120,7 +138,9 @@ class MediaPlayerNotification() : Service() {
                     .setMediaSession(mediaSession.sessionToken)
                     .setShowActionsInCompactView(0, 1, 2, 3)
             )
+            .addAction(prevAction)
             .addAction(pauseAction)
+            .addAction(nextAction)
             .build()
     }
     override fun onDestroy() {
