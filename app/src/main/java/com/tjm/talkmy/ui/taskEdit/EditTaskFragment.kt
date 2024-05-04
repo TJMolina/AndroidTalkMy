@@ -217,24 +217,10 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
             }
         }
         requireActivity().onBackPressedDispatcher.addCallback(this) {
-            editTextManager.modifiedVerify {verify->
-                if (verify == "false") {
-                    editTextManager.text { text ->
-                        editTaskViewModel.executeFunction(FunctionName.SaveTask(text))
-                        isEnabled = false
-                        requireActivity().onBackPressedDispatcher.onBackPressed()
-                    }
-                } else {
-                    editTextManager.reloadText { sentences, indice ->
-                        editTextManager.text { text ->
-                            editTaskViewModel.executeFunction(FunctionName.SaveTask(text))
-                            isEnabled = false
-                            requireActivity().onBackPressedDispatcher.onBackPressed()
-                        }
-                    }
-                }
+            saveCurrentTask{
+                isEnabled = false
+                requireActivity().onBackPressedDispatcher.onBackPressed()
             }
-
         }
     }
 
@@ -317,17 +303,32 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         editTextManager.setText(text.separateSentencesInsertPTag())
     }
 
+    private fun saveCurrentTask(then:()->Unit = {}){
+        editTextManager.modifiedVerify {verify->
+            if (verify == "false") {
+                editTextManager.text { text ->
+                    editTaskViewModel.executeFunction(FunctionName.SaveTask(text))
+                    then()
+                }
+            } else {
+                editTextManager.reloadText { _, _ ->
+                    editTextManager.text { text ->
+                        editTaskViewModel.executeFunction(FunctionName.SaveTask(text))
+                        then()
+                    }
+                }
+            }
+        }
+    }
+
     private fun observeTextFromUrl() {
         lifecycleScope.launch(Dispatchers.IO) {
             dialogsViewModel.getTextFromUrlProcces.collect { value ->
                 withContext(Dispatchers.Main) {
                     binding.apply {
                         if (value.isLoading) {
-                            editTextManager.text {
-                                editTaskViewModel.executeFunction(FunctionName.SaveTask(it))
-                            }
-                            circularProgressBar.visibility =
-                                if (value.isLoading) View.VISIBLE else View.GONE
+                            saveCurrentTask()
+                            circularProgressBar.visibility = View.VISIBLE
                         } else {
                             circularProgressBar.visibility = View.GONE
                             if (value.error.isBlank() && !dialogsViewModel.textGotFromUrl.isNullOrEmpty()) {
@@ -337,7 +338,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                                     editTaskViewModel.executeFunction(FunctionName.SaveTask(it))
                                 }
                             }
-
                         }
                     }
                 }

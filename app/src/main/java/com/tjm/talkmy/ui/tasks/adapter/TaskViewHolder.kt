@@ -33,7 +33,7 @@ class TaskViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         )
 
         binding.textBold25characters.text = builder
-        binding.tvDesc.text = task.nota.substring(auxText.length, maxSize250).replace("\n\n","\n")
+        binding.tvDesc.text = task.nota.substring(auxText.length, maxSize250).replace("\n\n","\n").replace("\\\"","\"")
         val date = task.fecha.split("-")
         binding.tvDate.text = "${date[2].substring(0,2)}/${date[1]}"
         binding.tvTask.setOnClickListener { editTask(task.id, task.nota) }

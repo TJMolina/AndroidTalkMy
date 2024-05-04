@@ -45,7 +45,7 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
     fun innerHTML(function: (String) -> Unit) = myWebView.evaluateJavascript(
         """(function() { return $editText.innerHTML; })();""".trimIndent()
     ) {
-        function(it)
+        function(it.replace(Regex("(\\\\u003C)"), "<"))
     }
 
     fun text(function: (String) -> Unit) = myWebView.evaluateJavascript(
@@ -65,9 +65,12 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
           }).join('');
     })();""".trimIndent()
         ) {
-        function(it.translateInnerTextToPlain().removeSurrounding("\"","\""))
+        innerHTML { html->
+            Logger.d(html)
+        }
+        Logger.d(it.removeSurrounding("\"","\"").translateInnerTextToPlain())
+        function(it.removeSurrounding("\"","\"").translateInnerTextToPlain())
     }
-
 
     fun reloadText(then: ((List<String>, Int) -> Unit)? = null) = myWebView.evaluateJavascript(
         """
@@ -76,7 +79,7 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
                     if (!text.match(/^<[^>]+>/)) {
                         $editText.innerHTML = text.replace(/^[^<]+/, "<div>${'$'}&</div>");
                     }
-                    text = Array.from(document.querySelectorAll(".contenidoArchivo > *")).filter(p => p.textContent.split('. ').length > 1);
+                    text = Array.from(document.querySelectorAll(".contenidoArchivo > *")).filter(p => p.textContent.split(/(?<!\.)\.\b./g).length > 1);
                     text.map(p => {
                         const oraciones = p.innerText.split(/(?<=\.)(?=\s)/g);
                         oraciones.reverse().forEach(oracion => {
@@ -134,8 +137,7 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
             }
         }
     }
-
-
+    
     fun setSelection(selected: Int) {
         myWebView.evaluateJavascript(
             """
@@ -150,8 +152,7 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
             """.trimIndent(), null
         )
     }
-
-
+    
     fun setParagraphClickedListener() {
         myWebView.evaluateJavascript(
             """

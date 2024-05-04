@@ -11,7 +11,7 @@ fun String.separateSentencesInsertPTag(): String {
     val text = this.replace(Regex("<"), "&lt").split(Regex("\\n"))
     return text.joinToString("") { paragraph ->
         if (paragraph.trim().isNotBlank()) {
-             paragraph.split(Regex("(?<=\\.)(?=\\s+)"))
+             paragraph.split(Regex("(?<=(?<!\\.)\\.)(?=\\s+)"))
                 .joinToString("") { "<p>${it}</p>" } + "</br>"
         } else {
             "</br>"
@@ -44,7 +44,7 @@ fun String.translateInnerTextToPlain(): String = this.removeSurrounding("\"", "\
     .replace(Regex("(?<![\\\\n])\\\\n\\\\n(?![\\\\nA-Za-z])"), " ")
     .replace(Regex("\\\\n\\\\n"), "\n")
     .replace(Regex("\\\\n"), "\n")
-    .replace(Regex("(\\\\u003C)"), "<")
+
 */
 
 fun String.isURL(): Boolean =
