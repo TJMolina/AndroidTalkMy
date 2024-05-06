@@ -4,7 +4,7 @@ import org.apache.commons.text.StringEscapeUtils
 
 fun String.separateSentences(): List<String> =
     this.split(Regex("\\n|\\\\n"))
-        .flatMap { it.split(Regex("(?<=\\.)(?=\\s+)")) }
+        .flatMap { it.split(Regex("(?<=(?<!\\.)\\.)(?=\\s+)")) }
         .filter { it.isNotBlank() }
 
 fun String.separateSentencesInsertPTag(): String {
@@ -39,13 +39,6 @@ fun String.translateHTMLtoPlain(): String =
         .filter { it.trim().isNotBlank() }.joinToString("\n\n")
 
 fun String.translateInnerTextToPlain(): String = this.replace("\\n", "\n").replace(Regex("(\\\\u003C)"), "<")
-/*
-fun String.translateInnerTextToPlain(): String = this.removeSurrounding("\"", "\"")
-    .replace(Regex("(?<![\\\\n])\\\\n\\\\n(?![\\\\nA-Za-z])"), " ")
-    .replace(Regex("\\\\n\\\\n"), "\n")
-    .replace(Regex("\\\\n"), "\n")
-
-*/
 
 fun String.isURL(): Boolean =
     matches(Regex("(http|https)://(www\\.)?[-a-zA-Z0-9@:%._\\+~#?&//=]{2,256}\\.[-a-zA-Z]{2,}(\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)?)"))

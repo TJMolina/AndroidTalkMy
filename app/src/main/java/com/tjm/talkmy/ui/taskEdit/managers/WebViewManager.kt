@@ -65,10 +65,6 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
           }).join('');
     })();""".trimIndent()
         ) {
-        innerHTML { html->
-            Logger.d(html)
-        }
-        Logger.d(it.removeSurrounding("\"","\"").translateInnerTextToPlain())
         function(it.removeSurrounding("\"","\"").translateInnerTextToPlain())
     }
 
@@ -76,16 +72,20 @@ class WebViewManager(private val myWebView: WebView, context: Context) {
         """
             (function() { 
                     let text = $editText.innerHTML;
-                    if (!text.match(/^<[^>]+>/)) {
-                        $editText.innerHTML = text.replace(/^[^<]+/, "<div>${'$'}&</div>");
+                    if (!text.match(/^<(?!font)[^>]+>/)) {
+                        $editText.innerHTML = text.replace(/<(font)[^>]*>(.*?)<\/\1>|([^<]+)/, "<div>${'$'}&</div>");
                     }
-                    text = Array.from(document.querySelectorAll(".contenidoArchivo > *")).filter(p => p.textContent.split(/(?<!\.)\.\b./g).length > 1);
-                    text.map(p => {
-                        const oraciones = p.innerText.split(/(?<=\.)(?=\s)/g);
-                        oraciones.reverse().forEach(oracion => {
+                    text = Array.from(document.querySelectorAll(".contenidoArchivo > *")).filter(p => p.textContent.split(/(?<=(?<!\.)\.)(?=\s+)/g).length > 1);
+                    text.map((p, index) => {
+                        const oraciones = p.innerText.split(/(?<=(?<!\.)\.)(?=\s+)/g);
+                        oraciones.reverse().forEach((oracion, i) => {
                             const nuevoParrafo = document.createElement('p');
                             nuevoParrafo.textContent = oracion;
                             p.parentNode.insertBefore(nuevoParrafo, p.nextSibling);
+                            if (i === 0) {
+                                const saltoLinea = document.createElement('br');
+                                p.parentNode.insertBefore(saltoLinea, nuevoParrafo.nextSibling);
+                            }
                         });
                         p.parentNode.removeChild(p);
                     });

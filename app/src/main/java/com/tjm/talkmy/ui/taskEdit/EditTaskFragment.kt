@@ -48,7 +48,6 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private var _binding: FragmentEditTaskBinding? = null
     private val binding get() = _binding!!
-
     private val dialogsViewModel by viewModels<DialogsViewModel>()
     private val editTaskViewModel by viewModels<EditTaskViewModel>()
     private lateinit var tts: TextToSpeech
@@ -188,7 +187,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private fun initTTS() {
         tts = TextToSpeech(requireContext(), this)
         ttsManager = TTSManager(tts, binding.rsTalkProgess)
-        editTextManager.getSentences { sentences, indice ->
+        editTextManager.getSentences { sentences, _ ->
             ttsManager.reloadSentences(sentences)
         }
         reajustRangeSliderProgress(ttsManager.sentences.size.toFloat())
@@ -257,6 +256,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
                     ttsManager.togglePlayback(sentences, indice, play)
                 }
             } else {
+                Logger.d("play modified")
                 editTextManager.reloadText { sentences, indice ->
                     reajustRangeSliderProgress(sentences.size.toFloat() - 1, indice.toFloat())
                     ttsManager.togglePlayback(sentences, indice, play)
@@ -270,6 +270,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
         val slider = binding.rsTalkProgess
         slider.value = if(slider.value < slider.valueTo) slider.value + 1f else slider.valueTo
     }
+
     private fun previus(){
         ttsManager.changinParagraphWithControls = true
         val slider = binding.rsTalkProgess
@@ -278,7 +279,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private fun reajustRangeSliderProgress(toValue: Float, start:Float = 0f){
          binding.rsTalkProgess.value = if (start > 0f) start else 0f
-        if (toValue > 0) binding.rsTalkProgess.valueTo = toValue else null
+        if (toValue > 0) binding.rsTalkProgess.valueTo = toValue
     }
 
     private fun addTaskTextFromUrl(url: String?) {
@@ -306,11 +307,13 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private fun saveCurrentTask(then:()->Unit = {}){
         editTextManager.modifiedVerify {verify->
             if (verify == "false") {
+                Logger.d("no modified")
                 editTextManager.text { text ->
                     editTaskViewModel.executeFunction(FunctionName.SaveTask(text))
                     then()
                 }
             } else {
+                Logger.d("modified")
                 editTextManager.reloadText { _, _ ->
                     editTextManager.text { text ->
                         editTaskViewModel.executeFunction(FunctionName.SaveTask(text))

@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
+            :focus{
+                outline: none !important;
+                -webkit-tap-highlight-color: transparent;
+            }
             body{
                 padding: 0px;
                 margin: 0px;
@@ -19,15 +23,22 @@
                 font-family: Arial, Helvetica, sans-serif;
                 font-size: 1rem;
             }
+            .contenidoArchivo *{
+                color: black !important;
+            }
 
             .contenidoArchivo:empty::before {
                 content: "Escribe aquí...";
                 color: gray;
             }
 
+            span{
+                background-color: unset !important;
+            }
+
             .parrafoEnfocadoRemarcado, .parrafoEnfocadoRemarcado *{
-              background-color: #59b4df;
-              color: white;
+              background-color: #59b4df !important;
+              color: white !important;
             }
 
             p{
@@ -36,11 +47,7 @@
             }
 
             .oscureMode *{
-                color: white;
-            }
-            :focus{
-                outline: none !important;
-                -webkit-tap-highlight-color: transparent;
+                color: white !important;
             }
     </style>
 </head>
