@@ -54,7 +54,7 @@ class EditTaskFragment : Fragment(), TextToSpeech.OnInitListener {
     private lateinit var ttsManager: TTSManager
     private lateinit var editTextManager: WebViewManager
     private val arg: EditTaskFragmentArgs by navArgs()
-    lateinit var mediaPlayerNotification: MediaPlayerNotification
+    private lateinit var mediaPlayerNotification: MediaPlayerNotification
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
